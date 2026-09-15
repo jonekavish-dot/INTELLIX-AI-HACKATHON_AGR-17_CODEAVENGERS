@@ -1,4 +1,4 @@
-import { X, FileText, ShieldCheck, ShieldAlert, Sparkles } from 'lucide-react'
+import { X, FileText, ShieldCheck, ShieldAlert, Sparkles, ClipboardCheck } from 'lucide-react'
 
 const SEV_BADGE = {
   HIGH:   'bg-red-100 text-red-800 border border-red-200',
@@ -77,6 +77,16 @@ export default function EvidenceModal({ change, onClose }) {
   const impact = change.impact || change.severity || 'MEDIUM'
   const sectionTitle = change.section || change.section_title || 'Document Section'
 
+  const operationalNote = change.operational_note || (
+    change.change_type === 'ADDED'
+      ? `OPERATIONAL ACTION: Implement newly introduced provisions under '${sectionTitle}'. Update departmental intake guidelines and inform field verification staff.`
+      : change.change_type === 'REMOVED'
+      ? `OPERATIONAL ACTION: Cease enforcement of previous clause under '${sectionTitle}'. Remove requirement from active checklists and do not penalize applicants.`
+      : change.change_type === 'SEMANTICALLY_EQUIVALENT'
+      ? `OPERATIONAL ACTION: Language harmonized without substantive legal impact under '${sectionTitle}'. Maintain existing operational procedures.`
+      : `OPERATIONAL ACTION: Review modified criteria under '${sectionTitle}'. Ensure verification teams evaluate applications against the revised standard.`
+  )
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
       <div className="bg-white rounded-3xl shadow-2xl w-full max-w-4xl max-h-[92vh] overflow-y-auto border border-gray-100 flex flex-col">
@@ -113,6 +123,40 @@ export default function EvidenceModal({ change, onClose }) {
           >
             <X className="w-5 h-5" />
           </button>
+        </div>
+
+        {/* Operational Note for Administrative Action & Field Study */}
+        <div className="mx-5 mt-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50/70 border border-blue-200/80 rounded-2xl shadow-xs">
+          <div className="flex items-start gap-3">
+            <div className="p-2 bg-blue-600 text-white rounded-xl shadow-xs flex-shrink-0 mt-0.5">
+              <ClipboardCheck className="w-5 h-5" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between gap-2 mb-1 flex-wrap">
+                <span className="text-[11px] font-extrabold uppercase tracking-wider text-blue-900 flex items-center gap-1.5">
+                  Operational Note for Field Officers & Administrative Study
+                </span>
+                <span className="text-[10px] font-bold text-blue-700 bg-blue-100/80 px-2 py-0.5 rounded-full border border-blue-200">
+                  Field Action Guide
+                </span>
+              </div>
+              <p className="text-xs text-blue-950 font-medium leading-relaxed">
+                {operationalNote}
+              </p>
+              {change.old_value && change.new_value && (
+                <div className="mt-2.5 pt-2 border-t border-blue-200/60 flex items-center gap-2 text-xs flex-wrap">
+                  <span className="text-[11px] font-bold text-gray-500">Value Shift:</span>
+                  <span className="font-mono text-red-700 bg-red-50 border border-red-200 px-1.5 py-0.5 rounded">
+                    {change.old_value}
+                  </span>
+                  <span className="text-gray-400 font-bold">➔</span>
+                  <span className="font-mono text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded font-bold">
+                    {change.new_value}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Side-by-Side Source Evidence */}

@@ -1,4 +1,4 @@
-import { ChevronRight, FileText, ShieldCheck, ShieldAlert, Sparkles } from 'lucide-react'
+import { ChevronRight, FileText, ShieldCheck, ShieldAlert, Sparkles, ClipboardCheck } from 'lucide-react'
 
 const SEV_BADGE = {
   HIGH:   'bg-red-100 text-red-800 border border-red-200',
@@ -30,6 +30,16 @@ export default function ChangeCard({ change, onViewEvidence }) {
   const confidence = Math.round((change.confidence || 0.85) * 100)
   const impact = change.impact || change.severity || 'MEDIUM'
   const sectionTitle = change.section || change.section_title || 'Document Section'
+
+  const operationalNote = change.operational_note || (
+    change.change_type === 'ADDED'
+      ? `OPERATIONAL ACTION: Implement newly introduced provisions under '${sectionTitle}'. Update intake checklists and notify field staff.`
+      : change.change_type === 'REMOVED'
+      ? `OPERATIONAL ACTION: Cease enforcement of previous clause under '${sectionTitle}'. Remove requirement from active checklists.`
+      : change.change_type === 'SEMANTICALLY_EQUIVALENT'
+      ? `OPERATIONAL ACTION: Language harmonized under '${sectionTitle}'. Maintain existing administrative procedures.`
+      : `OPERATIONAL ACTION: Apply modified criteria under '${sectionTitle}'. Ensure verification teams evaluate applications against the revised standard.`
+  )
 
   return (
     <div
@@ -92,9 +102,30 @@ export default function ChangeCard({ change, onViewEvidence }) {
       </p>
 
       {/* Interpretation */}
-      <p className="text-gray-600 text-xs mb-3 leading-relaxed">
+      <p className="text-gray-600 text-xs mb-2.5 leading-relaxed">
         <span className="font-bold text-gray-700">Analysis:</span> {change.interpretation || change.impact_explanation}
       </p>
+
+      {/* Operational Note for Administrative Action */}
+      <div className="mb-3 p-2.5 bg-blue-50/80 border border-blue-200/80 rounded-xl text-xs flex items-start gap-2 shadow-2xs">
+        <ClipboardCheck className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+        <div className="flex-1 min-w-0">
+          <span className="font-bold text-blue-900 block text-[11px] uppercase tracking-wide mb-0.5">
+            Operational Note:
+          </span>
+          <p className="text-gray-700 text-xs leading-relaxed">
+            {operationalNote}
+          </p>
+          {change.old_value && change.new_value && (
+            <div className="mt-1.5 flex items-center gap-1.5 text-[11px] font-mono">
+              <span className="text-gray-400 font-sans font-medium text-[10px]">Shift:</span>
+              <span className="text-red-700 bg-red-50 border border-red-200 px-1 rounded">{change.old_value}</span>
+              <span className="text-gray-400 font-bold">➔</span>
+              <span className="text-emerald-700 bg-emerald-50 border border-emerald-200 px-1 rounded font-semibold">{change.new_value}</span>
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* Footer bar with Evidence Status */}
       <div className="flex items-center justify-between pt-2 border-t border-gray-100">
