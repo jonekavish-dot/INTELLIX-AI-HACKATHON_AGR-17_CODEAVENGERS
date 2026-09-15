@@ -1,4 +1,5 @@
-import { ChevronRight, FileText, ShieldCheck, ShieldAlert, Sparkles, ClipboardCheck } from 'lucide-react'
+import { ChevronRight, FileText, ShieldCheck, ShieldAlert, Sparkles, ClipboardCheck, Zap } from 'lucide-react'
+import { parseOperationalNote } from '../utils/operationalNoteParser'
 
 const SEV_BADGE = {
   HIGH:   'bg-red-100 text-red-800 border border-red-200',
@@ -40,6 +41,7 @@ export default function ChangeCard({ change, onViewEvidence }) {
       ? `Provision under '${sectionTitle}' reworded without changing substantive meaning.`
       : `Content under '${sectionTitle}' was modified in new version.`
   )
+  const { shift: noteShift, action: noteAction } = parseOperationalNote(operationalNote)
 
   return (
     <div
@@ -107,28 +109,47 @@ export default function ChangeCard({ change, onViewEvidence }) {
       </p>
 
       {/* Operational Note for Administrative Action */}
-      <div className="mb-3 p-2.5 sm:p-3 bg-blue-50/80 border border-blue-200/80 rounded-xl text-xs flex items-start gap-2 shadow-2xs">
-        <ClipboardCheck className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
-        <div className="flex-1 min-w-0">
-          <span className="font-extrabold text-blue-900 block text-[10px] sm:text-[11px] uppercase tracking-wide mb-0.5">
-            Operational Note:
-          </span>
-          <p className="text-gray-800 text-[11px] sm:text-xs leading-relaxed break-words font-medium">
-            {operationalNote}
-          </p>
-          {change.old_value && change.new_value && (
-            <div className="mt-2 flex items-center gap-1.5 text-[10px] sm:text-[11px] font-mono flex-wrap">
-              <span className="text-gray-400 font-sans font-medium text-[10px]">Shift:</span>
-              <span className="text-red-700 bg-red-50 border border-red-200 px-1 rounded break-all max-w-full">
-                {change.old_value}
+      <div className="mb-3 p-2.5 sm:p-3 bg-gradient-to-r from-blue-50/90 to-indigo-50/60 border border-blue-200/80 rounded-xl text-xs space-y-2 shadow-2xs">
+        <div className="flex items-start gap-2">
+          <ClipboardCheck className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between gap-1 mb-1">
+              <span className="font-extrabold text-blue-900 block text-[10px] sm:text-[11px] uppercase tracking-wide">
+                Operational Note
               </span>
-              <span className="text-gray-400 font-bold">➔</span>
-              <span className="text-emerald-700 bg-emerald-50 border border-emerald-200 px-1 rounded font-bold break-all max-w-full">
-                {change.new_value}
+              <span className="text-[9px] font-bold text-blue-700 bg-blue-100/80 px-2 py-0.5 rounded-full">
+                Administrative Directive
               </span>
             </div>
-          )}
+            <p className="text-gray-800 text-[11px] sm:text-xs leading-relaxed break-words font-medium">
+              {noteShift}
+            </p>
+          </div>
         </div>
+
+        {/* Action Directive Highlight Callout */}
+        {noteAction && (
+          <div className="p-2 sm:p-2.5 bg-amber-50/90 border border-amber-200/90 rounded-lg flex items-start gap-2">
+            <Zap className="w-3.5 h-3.5 text-amber-600 flex-shrink-0 mt-0.5" />
+            <div className="text-[11px] sm:text-xs text-amber-950 leading-relaxed break-words">
+              <strong className="text-amber-900 font-bold">Action Required:</strong> {noteAction}
+            </div>
+          </div>
+        )}
+
+        {/* Value Shift badge */}
+        {change.old_value && change.new_value && (
+          <div className="pt-1.5 border-t border-blue-200/50 flex items-center gap-1.5 text-[10px] sm:text-[11px] font-mono flex-wrap">
+            <span className="text-gray-500 font-sans font-medium text-[10px]">Shift:</span>
+            <span className="text-red-700 bg-red-50 border border-red-200 px-1.5 py-0.5 rounded break-all max-w-full">
+              {change.old_value}
+            </span>
+            <span className="text-gray-400 font-bold">➔</span>
+            <span className="text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded font-bold break-all max-w-full">
+              {change.new_value}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Footer bar with Evidence Status and Touch Target */}

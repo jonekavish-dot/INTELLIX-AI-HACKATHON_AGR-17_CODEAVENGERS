@@ -9,12 +9,14 @@ import {
   FileSpreadsheet,
   CheckCircle2,
   ArrowRight,
+  Zap,
 } from 'lucide-react'
 import Navbar from '../components/Navbar'
 import StatsBar from '../components/StatsBar'
 import FilterBar from '../components/FilterBar'
 import ChangeCard from '../components/ChangeCard'
 import EvidenceModal from '../components/EvidenceModal'
+import { parseOperationalNote } from '../utils/operationalNoteParser'
 
 export default function ResultsPage({ results, user, onLogout, onNewComparison }) {
   const [activeTab, setActiveTab] = useState('exhaustive') // 'exhaustive' | 'impact' | 'fields'
@@ -231,8 +233,21 @@ export default function ResultsPage({ results, user, onLogout, onNewComparison }
                           {f.evidence_status}
                         </span>
                       </td>
-                      <td className="px-6 py-3.5 text-gray-600 max-w-xs leading-relaxed">
-                        {f.notes || '—'}
+                      <td className="px-6 py-3.5 text-gray-600 max-w-xs leading-relaxed text-xs">
+                        {(() => {
+                          const { shift, action } = parseOperationalNote(f.notes)
+                          return (
+                            <div className="space-y-1">
+                              <p className="text-gray-800 font-medium">{shift || '—'}</p>
+                              {action && (
+                                <p className="text-[11px] text-amber-900 bg-amber-50 border border-amber-200 px-2 py-1 rounded-md font-medium flex items-start gap-1">
+                                  <Zap className="w-3 h-3 text-amber-600 flex-shrink-0 mt-0.5" />
+                                  <span><strong className="text-amber-950">Action:</strong> {action}</span>
+                                </p>
+                              )}
+                            </div>
+                          )
+                        })()}
                       </td>
                     </tr>
                   ))}
@@ -293,10 +308,23 @@ export default function ResultsPage({ results, user, onLogout, onNewComparison }
                   </div>
 
                   {/* Notes & Evidence */}
-                  <div className="pt-1 text-xs">
-                    <p className="text-[11px] text-gray-700 leading-snug">
-                      <strong className="text-gray-900">Note:</strong> {f.notes || '—'}
-                    </p>
+                  <div className="pt-1 text-xs space-y-1.5">
+                    {(() => {
+                      const { shift, action } = parseOperationalNote(f.notes)
+                      return (
+                        <>
+                          <p className="text-[11px] text-gray-700 leading-snug">
+                            <strong className="text-gray-900">Note:</strong> {shift || '—'}
+                          </p>
+                          {action && (
+                            <div className="p-2 rounded-lg bg-amber-50/90 border border-amber-200 text-amber-950 text-[11px] flex items-start gap-1.5">
+                              <Zap className="w-3.5 h-3.5 text-amber-600 flex-shrink-0 mt-0.5" />
+                              <span><strong className="text-amber-900">Action:</strong> {action}</span>
+                            </div>
+                          )}
+                        </>
+                      )
+                    })()}
                     <div className="mt-2 flex items-center justify-between text-[10px]">
                       <span className="inline-flex items-center gap-1 text-emerald-700 font-bold">
                         <ShieldCheck className="w-3.5 h-3.5" />

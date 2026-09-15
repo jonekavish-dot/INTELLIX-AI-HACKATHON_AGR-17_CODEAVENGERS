@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { X, FileText, ShieldCheck, ShieldAlert, Sparkles, ClipboardCheck } from 'lucide-react'
+import { X, FileText, ShieldCheck, ShieldAlert, Sparkles, ClipboardCheck, Zap } from 'lucide-react'
+import { parseOperationalNote } from '../utils/operationalNoteParser'
 
 const SEV_BADGE = {
   HIGH:   'bg-red-100 text-red-800 border border-red-200',
@@ -91,6 +92,7 @@ export default function EvidenceModal({ change, onClose }) {
       ? `Provision under '${sectionTitle}' reworded without changing substantive meaning.`
       : `Content under '${sectionTitle}' was modified in new version.`
   )
+  const { shift: noteShift, action: noteAction } = parseOperationalNote(operationalNote)
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/60 backdrop-blur-xs overflow-y-auto">
@@ -135,7 +137,7 @@ export default function EvidenceModal({ change, onClose }) {
         </div>
 
         {/* Operational Note Banner */}
-        <div className="mx-3 sm:mx-5 mt-4 p-3.5 sm:p-4 bg-gradient-to-r from-blue-50 to-indigo-50/70 border border-blue-200/80 rounded-2xl shadow-2xs">
+        <div className="mx-3 sm:mx-5 mt-4 p-3.5 sm:p-4 bg-gradient-to-r from-blue-50 to-indigo-50/70 border border-blue-200/80 rounded-2xl shadow-2xs space-y-2.5">
           <div className="flex items-start gap-2.5 sm:gap-3">
             <div className="p-2 bg-blue-600 text-white rounded-xl shadow-xs flex-shrink-0 mt-0.5">
               <ClipboardCheck className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -146,26 +148,37 @@ export default function EvidenceModal({ change, onClose }) {
                   OPERATIONAL NOTE
                 </span>
                 <span className="text-[10px] font-bold text-blue-700 bg-blue-100/80 px-2 py-0.5 rounded-full border border-blue-200">
-                  Field Action Guide
+                  Administrative Directive
                 </span>
               </div>
               <p className="text-xs text-blue-950 font-medium leading-relaxed break-words">
-                {operationalNote}
+                {noteShift}
               </p>
-              {change.old_value && change.new_value && (
-                <div className="mt-2.5 pt-2 border-t border-blue-200/60 flex items-center gap-1.5 sm:gap-2 text-xs flex-wrap font-mono">
-                  <span className="text-[10px] sm:text-[11px] font-bold text-gray-500 font-sans">Value Shift:</span>
-                  <span className="text-red-700 bg-red-50 border border-red-200 px-1.5 py-0.5 rounded break-all max-w-full">
-                    {change.old_value}
-                  </span>
-                  <span className="text-gray-400 font-bold">➔</span>
-                  <span className="text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded font-bold break-all max-w-full">
-                    {change.new_value}
-                  </span>
-                </div>
-              )}
             </div>
           </div>
+
+          {/* Action Required Box */}
+          {noteAction && (
+            <div className="p-2.5 bg-amber-50/90 border border-amber-200/90 rounded-xl flex items-start gap-2">
+              <Zap className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+              <div className="text-xs text-amber-950 leading-relaxed break-words">
+                <strong className="text-amber-900 font-bold">Action Required:</strong> {noteAction}
+              </div>
+            </div>
+          )}
+
+          {change.old_value && change.new_value && (
+            <div className="pt-2 border-t border-blue-200/60 flex items-center gap-1.5 sm:gap-2 text-xs flex-wrap font-mono">
+              <span className="text-[10px] sm:text-[11px] font-bold text-gray-500 font-sans">Value Shift:</span>
+              <span className="text-red-700 bg-red-50 border border-red-200 px-1.5 py-0.5 rounded break-all max-w-full">
+                {change.old_value}
+              </span>
+              <span className="text-gray-400 font-bold">➔</span>
+              <span className="text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded font-bold break-all max-w-full">
+                {change.new_value}
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Side-by-Side Source Evidence Section */}
