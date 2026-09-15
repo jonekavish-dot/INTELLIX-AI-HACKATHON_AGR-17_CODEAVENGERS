@@ -1,7 +1,8 @@
 """
 AgriDiff AI — Semantic Aligner
 Maps old document chunks to new document chunks using cosine similarity.
-Strategy: greedy best-match (fast, good enough for policy docs).
+Produces exhaustive pairs with semantic tagging.
+BIT-AI-001 | AGR-17 | Team CODEAVENGERS
 """
 
 import logging
@@ -11,10 +12,9 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 logger = logging.getLogger("agridiff.aligner")
 
-EQUIVALENT_THRESHOLD = 0.95   # >= this → EQUIVALENT (no meaningful change)
-REWORD_THRESHOLD = 0.85       # >= this → REWORDED (structural change, not meaningful)
-MODIFIED_THRESHOLD = 0.40     # >= this → MODIFIED (possible meaningful change)
-# < MODIFIED_THRESHOLD with no match → ADDED or REMOVED
+EQUIVALENT_THRESHOLD = 0.95   # >= this with small textual diff -> SEMANTICALLY_EQUIVALENT
+REWORD_THRESHOLD = 0.85       # >= this -> REWORDED / structural change
+MODIFIED_THRESHOLD = 0.35     # >= this -> MODIFIED match
 
 
 def align_chunks(
@@ -24,46 +24,58 @@ def align_chunks(
     new_embeddings: np.ndarray,
 ) -> List[Dict]:
     """
-    Align old chunks to new chunks using cosine similarity.
-    Returns list of aligned pair dicts with similarity scores.
+    Align old chunks to new chunks using cosine similarity matrix.
+    Returns list of aligned pair dicts.
+    Guarantees every chunk is represented (EXHAUSTIVE).
     """
     if len(old_chunks) == 0 or len(new_chunks) == 0:
-        logger.warning("Empty chunk list received — cannot align")
+        logger.warning("Empty chunk list received — fallback to all added/removed")
         return _all_as_added_or_removed(old_chunks, new_chunks)
 
-    # Cosine similarity matrix: shape (M, N)
+    # Cosine similarity matrix: shape (len(old), len(new))
     sim_matrix = cosine_similarity(old_embeddings, new_embeddings)
 
     pairs = []
     used_new_indices = set()
 
-    # For each old chunk, find its best matching new chunk
+    # Step 1: For each old chunk, find best matching new chunk
     for old_idx, old_chunk in enumerate(old_chunks):
         scores = sim_matrix[old_idx]
         best_new_idx = int(np.argmax(scores))
         best_score = float(scores[best_new_idx])
 
+        # Match threshold
         if best_score >= MODIFIED_THRESHOLD and best_new_idx not in used_new_indices:
             used_new_indices.add(best_new_idx)
-            change_type = _classify_by_similarity(best_score)
+            new_chunk = new_chunks[best_new_idx]
+            
+            # Check for exact textual identity
+            is_exact = old_chunk["text"].strip() == new_chunk["text"].strip()
+            if is_exact:
+                pre_type = "UNCHANGED"
+            elif best_score >= EQUIVALENT_THRESHOLD:
+                pre_type = "SEMANTICALLY_EQUIVALENT"
+            else:
+                pre_type = "MODIFIED"
+
             pairs.append({
                 "old_chunk": old_chunk,
-                "new_chunk": new_chunks[best_new_idx],
+                "new_chunk": new_chunk,
                 "similarity": round(best_score, 4),
-                "change_type_pre": change_type,
+                "change_type_pre": pre_type,
                 "matched": True,
             })
         else:
-            # Old chunk has no good match → REMOVED
+            # Old chunk has no good match in new document -> REMOVED
             pairs.append({
                 "old_chunk": old_chunk,
                 "new_chunk": None,
-                "similarity": round(best_score, 4),
+                "similarity": round(best_score, 4) if len(scores) > 0 else 0.0,
                 "change_type_pre": "REMOVED",
                 "matched": False,
             })
 
-    # New chunks with no match → ADDED
+    # Step 2: Any new chunk not yet matched -> ADDED
     for new_idx, new_chunk in enumerate(new_chunks):
         if new_idx not in used_new_indices:
             pairs.append({
@@ -75,22 +87,14 @@ def align_chunks(
             })
 
     logger.info(
-        f"Aligned {len(old_chunks)} old + {len(new_chunks)} new chunks → "
-        f"{len(pairs)} pairs "
+        f"Aligned {len(old_chunks)} old + {len(new_chunks)} new chunks -> {len(pairs)} pairs "
         f"({sum(1 for p in pairs if p['change_type_pre'] == 'MODIFIED')} modified, "
         f"{sum(1 for p in pairs if p['change_type_pre'] == 'ADDED')} added, "
-        f"{sum(1 for p in pairs if p['change_type_pre'] == 'REMOVED')} removed)"
+        f"{sum(1 for p in pairs if p['change_type_pre'] == 'REMOVED')} removed, "
+        f"{sum(1 for p in pairs if p['change_type_pre'] == 'SEMANTICALLY_EQUIVALENT')} semantically equivalent, "
+        f"{sum(1 for p in pairs if p['change_type_pre'] == 'UNCHANGED')} unchanged)"
     )
     return pairs
-
-
-def _classify_by_similarity(score: float) -> str:
-    if score >= EQUIVALENT_THRESHOLD:
-        return "EQUIVALENT"
-    elif score >= REWORD_THRESHOLD:
-        return "REWORDED"
-    else:
-        return "MODIFIED"
 
 
 def _all_as_added_or_removed(old_chunks: List[Dict], new_chunks: List[Dict]) -> List[Dict]:
@@ -100,4 +104,3 @@ def _all_as_added_or_removed(old_chunks: List[Dict], new_chunks: List[Dict]) -> 
     for c in new_chunks:
         pairs.append({"old_chunk": None, "new_chunk": c, "similarity": 0.0, "change_type_pre": "ADDED", "matched": False})
     return pairs
-

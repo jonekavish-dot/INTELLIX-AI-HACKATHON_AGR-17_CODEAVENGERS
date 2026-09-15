@@ -141,37 +141,28 @@ def _match_header(line: str) -> Dict | None:
 
 def _chunk_text(text: str, section_title: str, section_number: str | None,
                 page_start: int, page_end: int) -> List[Dict]:
-    """Split section text into manageable chunks."""
-    # Split on double newline (paragraph boundaries)
-    paragraphs = [p.strip() for p in re.split(r"\n\n+", text) if p.strip()]
+    """Split section text into granular clause-level chunks."""
+    # Split on double newlines OR numbered subclauses (1.1, 1.2) OR list items (a), b))
+    raw_paras = [p.strip() for p in re.split(r"\n\n+|\n(?=\d+\.\d+)|\n(?=[a-e]\))|\n(?=[A-Z][A-Za-z\s]+:)", text) if p.strip()]
 
-    if not paragraphs:
+    if not raw_paras:
         return []
 
     chunks = []
-    current_chunk_words = []
-    current_word_count = 0
+    for p in raw_paras:
+        # Extract subsection number if present at beginning of clause (e.g. 1.1, 2.3)
+        m_sub = re.match(r"^(\d+\.\d+(?:\.\d+)?)\s*", p)
+        sub_num = m_sub.group(1) if m_sub else section_number
 
-    for para in paragraphs:
-        words = para.split()
-        if current_word_count + len(words) > CHUNK_SIZE and current_chunk_words:
-            chunks.append(_make_chunk(
-                " ".join(current_chunk_words), section_title, section_number, page_start, page_end
-            ))
-            # Keep overlap
-            overlap_words = current_chunk_words[-OVERLAP:] if len(current_chunk_words) > OVERLAP else current_chunk_words
-            current_chunk_words = overlap_words + words
-            current_word_count = len(current_chunk_words)
-        else:
-            current_chunk_words.extend(words)
-            current_word_count += len(words)
-
-    if current_chunk_words:
         chunks.append(_make_chunk(
-            " ".join(current_chunk_words), section_title, section_number, page_start, page_end
+            text=p,
+            section_title=section_title,
+            section_number=sub_num,
+            page_start=page_start,
+            page_end=page_end
         ))
 
-    return chunks if chunks else [_make_chunk(text, section_title, section_number, page_start, page_end)]
+    return chunks
 
 
 def _make_chunk(text: str, section_title: str, section_number: str | None,
