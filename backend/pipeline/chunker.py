@@ -80,19 +80,23 @@ def _detect_sections(pages_text: List[tuple]) -> List[Dict]:
             current_section["text_lines"].append("")
             continue
 
+        # Ignore benchmark footer watermark if present
+        if "BIT-AI-001" in stripped or "Team CODEAVENGERS" in stripped:
+            continue
+
         matched_header = _match_header(stripped)
-        if matched_header:
+        if matched_header and matched_header.get("is_top_level"):
             # Save previous section
             text = "\n".join(current_section["text_lines"]).strip()
             if text:
                 current_section["text"] = text
                 sections.append(dict(current_section))
 
-            # Start new section
+            # Start new section without inserting header itself into body lines
             current_section = {
                 "section_title": matched_header["title"],
                 "section_number": matched_header["number"],
-                "text_lines": [stripped],
+                "text_lines": [],
                 "page_start": page_num,
                 "page_end": page_num,
             }
@@ -121,20 +125,25 @@ def _detect_sections(pages_text: List[tuple]) -> List[Dict]:
 
 
 def _match_header(line: str) -> Dict | None:
-    """Try to match a line as a section header. Returns {number, title} or None."""
-    # Numbered: "1. Title" or "1.1 Title"
-    m = re.match(r"^(\d+(?:\.\d+)*\.?)\s+(.{3,80})$", line)
-    if m:
-        return {"number": m.group(1), "title": m.group(2).strip()}
+    """Try to match a line as a section header. Returns {number, title, is_top_level} or None."""
+    # Top-level numbered: "1. Title"
+    m_top = re.match(r"^(\d+\.)\s+(.{3,80})$", line)
+    if m_top:
+        return {"number": m_top.group(1), "title": m_top.group(2).strip(), "is_top_level": True}
+
+    # Subclause numbered: "1.1 Title" or "1.2.3 Title"
+    m_sub = re.match(r"^(\d+(?:\.\d+)+\.?)\s+(.{3,80})$", line)
+    if m_sub:
+        return {"number": m_sub.group(1), "title": m_sub.group(2).strip(), "is_top_level": False}
 
     # CHAPTER / SECTION keyword
     m = re.match(r"^(CHAPTER|SECTION)\s+(\d+)[:\s]+(.+)$", line, re.IGNORECASE)
     if m:
-        return {"number": f"{m.group(1)} {m.group(2)}", "title": m.group(3).strip()}
+        return {"number": f"{m.group(1)} {m.group(2)}", "title": m.group(3).strip(), "is_top_level": True}
 
-    # All-caps heading (3+ words or 5+ chars)
-    if line.isupper() and len(line) > 5 and len(line.split()) <= 8:
-        return {"number": None, "title": line}
+    # All-caps heading (3+ words or 5+ chars, not colon line)
+    if line.isupper() and len(line) > 5 and len(line.split()) <= 8 and not line.endswith(":"):
+        return {"number": None, "title": line, "is_top_level": True}
 
     return None
 
@@ -142,17 +151,36 @@ def _match_header(line: str) -> Dict | None:
 def _chunk_text(text: str, section_title: str, section_number: str | None,
                 page_start: int, page_end: int) -> List[Dict]:
     """Split section text into granular clause-level chunks."""
+    if not text.strip():
+        return []
+
+    # If Introduction (e.g. doc title), return as single chunk
+    if section_title == "Introduction":
+        return [_make_chunk(
+            text=text.strip(),
+            section_title=section_title,
+            section_number=None,
+            page_start=page_start,
+            page_end=page_end,
+        )]
+
     # Split on double newlines OR numbered subclauses (1.1, 1.2) OR list items (a), b))
-    raw_paras = [p.strip() for p in re.split(r"\n\n+|\n(?=\d+\.\d+)|\n(?=[a-e]\))|\n(?=[A-Z][A-Za-z\s]+:)", text) if p.strip()]
+    raw_paras = [p.strip() for p in re.split(r"\n\n+|\n(?=\d+\.\d+)|\n(?=[a-e]\))", text) if p.strip()]
 
     if not raw_paras:
         return []
 
     chunks = []
     for p in raw_paras:
-        # Extract subsection number if present at beginning of clause (e.g. 1.1, 2.3)
-        m_sub = re.match(r"^(\d+\.\d+(?:\.\d+)?)\s*", p)
-        sub_num = m_sub.group(1) if m_sub else section_number
+        m_sub = re.match(r"^(\d+\.\d+(?:\.\d+)?)\b", p)
+        m_list = re.match(r"^([a-e]\))\s*", p)
+
+        if m_sub:
+            sub_num = m_sub.group(1)
+        elif m_list:
+            sub_num = m_list.group(1)
+        else:
+            sub_num = section_number
 
         chunks.append(_make_chunk(
             text=p,
@@ -174,4 +202,5 @@ def _make_chunk(text: str, section_title: str, section_number: str | None,
         "page_start": page_start,
         "page_end": page_end,
     }
+
 
