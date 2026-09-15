@@ -8,10 +8,12 @@ Validates LLM quotes against source text and constructs canonical dual-mode outp
 BIT-AI-001 | AGR-17 | Team CODEAVENGERS
 """
 
+from __future__ import annotations
+
 import re
 import time
 import logging
-from typing import List, Dict, Any, Tuple
+from typing import List, Dict, Any, Tuple, Optional, Union
 try:
     from models.schemas import (
         DetectedChange,
