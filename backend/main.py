@@ -321,3 +321,9 @@ async def run_preset_comparison(preset_id: str, background_tasks: BackgroundTask
     )
 
     return {"job_id": job_id, "status": "processing", "message": f"Preset '{preset_id}' started."}
+
+
+if __name__ == "__main__":
+    import uvicorn
+    port = int(os.getenv("PORT", "8000"))
+    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=False)

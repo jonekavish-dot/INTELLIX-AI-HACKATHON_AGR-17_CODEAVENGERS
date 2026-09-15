@@ -287,25 +287,36 @@ def compare_structured_entities(
             new_val_display = "NOT_FOUND"
             old_val_display = old_val
             status = "SUPPORTED"
-            notes = f"{label} was present in old version but is absent in new version."
+            notes = f"{label} was present in old version but is absent in new version. Action Required: Remove requirement from active verification checklists."
         elif not old_val and new_val:
             change_type = "ADDED"
             old_val_display = "NOT_FOUND"
             new_val_display = new_val
             status = "SUPPORTED"
-            notes = f"{label} was added in new version."
+            notes = f"{label} was added in new version as '{new_val}'. Action Required: Enforce newly added entry during field verification and revenue endorsement."
         elif old_val.strip().lower() == new_val.strip().lower():
             change_type = "UNCHANGED"
             old_val_display = old_val
             new_val_display = new_val
             status = "SUPPORTED"
-            notes = f"{label} remained identical."
+            notes = f"{label} remained identical as '{old_val}'. Action Required: Retain existing operational protocol."
         else:
             change_type = "MODIFIED"
             old_val_display = old_val
             new_val_display = new_val
             status = "SUPPORTED"
-            notes = f"{label} changed from '{old_val}' to '{new_val}'."
+            if key == "land_area":
+                notes = f"{label} changed from '{old_val}' to '{new_val}'. Action Required: Recompute land holding ceiling and adjust property tax assessment."
+            elif key == "survey_number":
+                notes = f"{label} changed from '{old_val}' to '{new_val}'. Action Required: Inspect village FMB sketch to verify boundary coordinates of subdivided parcel {new_val}."
+            elif key == "patta_holder":
+                notes = f"{label} changed from '{old_val}' to '{new_val}'. Action Required: Verify registered sale deed and legal heir succession documentation for mutation endorsement."
+            elif key in ("verifier", "verifier_designation"):
+                notes = f"{label} changed from '{old_val}' to '{new_val}'. Action Required: Dossier requires final attestation signature and official seal of the {new_val}."
+            elif key == "verification_date":
+                notes = f"{label} changed from '{old_val}' to '{new_val}'. Action Required: Record official attestation timestamp in the taluk revenue register."
+            else:
+                notes = f"{label} changed from '{old_val}' to '{new_val}'. Action Required: Update verification checklist against updated standard."
 
         field_changes.append(FieldChange(
             field_id=f"FLD-{idx:03d}",
