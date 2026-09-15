@@ -24,8 +24,8 @@ All backend dependencies are defined in [backend/requirements.txt](file:///d:/IN
 | `pdfplumber` | `0.11.0` | Tabular PDF extraction and character bounding-box geometry parsing | **YES** |
 | `pytesseract` | `0.3.13` | Optical Character Recognition (OCR) bridge for scanned agricultural land deeds | **OPTIONAL** (Fallback to text parsing) |
 | `Pillow` | `10.3.0` | Python Imaging Library (PIL) for image rasterization and page rendering | **YES** |
-| `sentence-transformers` | `3.0.1` | Semantic embeddings using transformer architectures (`all-MiniLM-L6-v2`) | **OPTIONAL** (Automatic TF-IDF fallback) |
-| `scikit-learn` | `1.5.0` | Machine learning toolkit providing fast TF-IDF vectorization and cosine similarity matrix | **YES** |
+| `sentence-transformers` | `3.0.1` | Heavy transformer embeddings (`all-MiniLM-L6-v2`) | **OPTIONAL** (Omitted on cloud hosts to stay under 512MB RAM) |
+| `scikit-learn` | `1.5.0` | Default lightweight semantic vectorizer & TF-IDF cosine similarity matrix (<70MB RAM) | **YES** |
 | `numpy` | `1.26.4` | High-performance numerical linear algebra and vector operations | **YES** |
 | `google-generativeai` | `0.7.2` | Official Google GenAI SDK for Gemini 1.5 Flash / Pro LLM analysis & change synthesis | **YES** |
 | `python-dotenv` | `1.0.1` | Automatic loading of `.env` configuration variables into process environment | **YES** |

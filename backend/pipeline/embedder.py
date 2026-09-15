@@ -5,6 +5,7 @@ or a unified joint TF-IDF/Hashing vectorizer fallback.
 BIT-AI-001 | AGR-17 | Team CODEAVENGERS
 """
 
+import os
 import logging
 import numpy as np
 from typing import List, Tuple
@@ -14,12 +15,15 @@ from sklearn.preprocessing import normalize
 logger = logging.getLogger("agridiff.embedder")
 
 MODEL_NAME = "all-MiniLM-L6-v2"
+ENABLE_NEURAL_EMBEDDINGS = os.getenv("ENABLE_NEURAL_EMBEDDINGS", "false").lower() in ("true", "1", "yes")
 _embedder = None  # singleton
 
 
 def get_embedder():
-    """Load and cache the embedding model if available."""
+    """Load and cache the embedding model if enabled; defaults to lightweight TF-IDF (<70MB RAM)."""
     global _embedder
+    if not ENABLE_NEURAL_EMBEDDINGS:
+        return None
     if _embedder is None:
         try:
             from sentence_transformers import SentenceTransformer

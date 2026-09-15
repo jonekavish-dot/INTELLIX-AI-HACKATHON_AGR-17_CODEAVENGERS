@@ -10,8 +10,7 @@ pdfplumber==0.11.0
 pytesseract==0.3.13
 Pillow==10.3.0
 
-# Embeddings + Similarity
-sentence-transformers==3.0.1
+# Semantic Similarity & Vectorizer (Lightweight, <70MB RAM footprint)
 scikit-learn==1.5.0
 numpy==1.26.4
 
