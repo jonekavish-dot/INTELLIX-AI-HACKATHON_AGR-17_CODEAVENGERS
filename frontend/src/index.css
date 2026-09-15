@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-gray-50 text-gray-900 font-sans;
+  }
+}
+
+@layer utilities {
+  .severity-high {
+    @apply bg-red-100 text-red-800 border-red-200;
+  }
+  .severity-medium {
+    @apply bg-amber-100 text-amber-800 border-amber-200;
+  }
+  .severity-low {
+    @apply bg-green-100 text-green-800 border-green-200;
+  }
+}

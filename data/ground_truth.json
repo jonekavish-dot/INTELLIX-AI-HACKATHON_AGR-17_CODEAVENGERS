@@ -1,0 +1,96 @@
+{
+  "total_changes": 9,
+  "document_pair": "Agricultural Support Scheme Guidelines 2023 vs 2024",
+  "changes": [
+    {
+      "id": "gt_001",
+      "section": "Eligibility Criteria",
+      "category": "Eligibility",
+      "change_type": "MODIFIED",
+      "severity": "HIGH",
+      "description": "Land holding limit increased from 2 hectares to 5 hectares",
+      "old_value": "2 hectares",
+      "new_value": "5 hectares"
+    },
+    {
+      "id": "gt_002",
+      "section": "Eligibility Criteria",
+      "category": "Eligibility",
+      "change_type": "MODIFIED",
+      "severity": "MEDIUM",
+      "description": "Annual income limit increased from Rs. 1,50,000 to Rs. 2,00,000",
+      "old_value": "Rs. 1,50,000",
+      "new_value": "Rs. 2,00,000"
+    },
+    {
+      "id": "gt_003",
+      "section": "Financial Assistance",
+      "category": "Financial",
+      "change_type": "MODIFIED",
+      "severity": "HIGH",
+      "description": "Subsidy per season increased from Rs. 5,000 to Rs. 8,000",
+      "old_value": "Rs. 5,000",
+      "new_value": "Rs. 8,000"
+    },
+    {
+      "id": "gt_004",
+      "section": "Financial Assistance",
+      "category": "Financial",
+      "change_type": "MODIFIED",
+      "severity": "HIGH",
+      "description": "Annual maximum assistance increased from Rs. 10,000 to Rs. 16,000",
+      "old_value": "Rs. 10,000",
+      "new_value": "Rs. 16,000"
+    },
+    {
+      "id": "gt_005",
+      "section": "Application Deadline",
+      "category": "Deadline",
+      "change_type": "MODIFIED",
+      "severity": "HIGH",
+      "description": "Application deadline extended from 31st March to 30th June",
+      "old_value": "31st March",
+      "new_value": "30th June"
+    },
+    {
+      "id": "gt_006",
+      "section": "Required Documents",
+      "category": "Documentation",
+      "change_type": "ADDED",
+      "severity": "MEDIUM",
+      "description": "Caste Certificate added as required document for SC/ST farmers",
+      "old_value": null,
+      "new_value": "Caste Certificate (for SC/ST farmers)"
+    },
+    {
+      "id": "gt_007",
+      "section": "Procedure",
+      "category": "Procedure",
+      "change_type": "MODIFIED",
+      "severity": "MEDIUM",
+      "description": "Online registration option added alongside KVK visit",
+      "old_value": "visit the nearest Krishi Vigyan Kendra",
+      "new_value": "register online at agri.state.gov.in OR visit KVK"
+    },
+    {
+      "id": "gt_008",
+      "section": "Procedure",
+      "category": "Procedure",
+      "change_type": "MODIFIED",
+      "severity": "MEDIUM",
+      "description": "Verification period reduced from 30 days to 15 days",
+      "old_value": "30 days",
+      "new_value": "15 days"
+    },
+    {
+      "id": "gt_009",
+      "section": "Beneficiary Conditions",
+      "category": "Beneficiary",
+      "change_type": "MODIFIED",
+      "severity": "HIGH",
+      "description": "Scheme extended to registered Farmer Producer Organizations (FPOs)",
+      "old_value": "individual farmers only",
+      "new_value": "individual farmers and registered FPOs"
+    }
+  ]
+}
