@@ -143,6 +143,37 @@ async def health():
     return {"status": "ok", "service": "AgriDiff AI", "version": "1.1.0"}
 
 
+@app.post("/api/auth/login")
+async def demo_login(payload: dict):
+    """Demo authentication endpoint for hackathon evaluation."""
+    username = (payload.get("username") or "").strip()
+    password = (payload.get("password") or "").strip()
+
+    if not username:
+        raise HTTPException(status_code=400, detail="Username is required.")
+    if not password:
+        raise HTTPException(status_code=400, detail="Password is required.")
+
+    demo_accounts = {
+        "farmer": {"role": "farmer", "displayName": "Farmer Demo", "badge": "Land Records & Subsidies"},
+        "officer": {"role": "officer", "displayName": "Agriculture Officer Demo", "badge": "Impact & Compliance"},
+        "reviewer": {"role": "reviewer", "displayName": "Reviewer / Auditor Demo", "badge": "Full Audit & Grounding"},
+    }
+
+    user_info = demo_accounts.get(username.lower())
+    if not user_info or password != "demo123":
+        raise HTTPException(status_code=401, detail="Invalid username or password. Use demo accounts: farmer, officer, reviewer with password 'demo123'.")
+
+    return {
+        "status": "authenticated",
+        "username": username.lower(),
+        "role": user_info["role"],
+        "displayName": user_info["displayName"],
+        "badge": user_info["badge"],
+        "token": f"demo-session-{uuid.uuid4().hex[:12]}",
+    }
+
+
 @app.post("/api/compare", response_model=CompareResponse)
 async def compare_documents(
     background_tasks: BackgroundTasks,
@@ -155,6 +186,9 @@ async def compare_documents(
 
     old_bytes = await old_pdf.read()
     new_bytes = await new_pdf.read()
+
+    if len(old_bytes) == 0 or len(new_bytes) == 0:
+        raise HTTPException(status_code=400, detail="Uploaded file is empty (0 bytes). Please upload a valid document.")
 
     max_bytes = 50 * 1024 * 1024
     if len(old_bytes) > max_bytes or len(new_bytes) > max_bytes:
