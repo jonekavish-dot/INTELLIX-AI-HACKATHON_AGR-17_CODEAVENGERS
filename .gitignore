@@ -13,11 +13,18 @@ venv/
 env/
 .venv/
 ENV/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
 
-# Environment
+# Environment and Secrets (CRITICAL)
 .env
+.env.*
+.env.local
+.env.*.local
 *.env
 !.env.example
+!.env.example.txt
 
 # IDE
 .vscode/
@@ -28,21 +35,24 @@ ENV/
 *.sln
 *.sw?
 
-# Node
+# Node / React
 node_modules/
+frontend/node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .npm/
 .yarn/
 
-# React build
+# Frontend Builds & Caches
 frontend/build/
 frontend/dist/
 frontend/.next/
 frontend/out/
+frontend/.vite/
+frontend/coverage/
 
-# OS
+# OS Specific
 .DS_Store
 Thumbs.db
 desktop.ini
@@ -51,13 +61,16 @@ desktop.ini
 *.log
 logs/
 
-# Temporary files
+# Temporary files & runtime uploads
 *.tmp
 *.temp
 tmp/
 temp/
+backend/uploads/
+backend/temp/
+uploads/
 
-# Model cache (large files — download locally)
+# Model cache & binaries (large artifacts — download/compute locally)
 .cache/
 /models/
 !backend/models/
@@ -66,16 +79,10 @@ backend/models/__pycache__/
 *.bin
 *.safetensors
 
-# Uploads (runtime)
-backend/uploads/
-backend/temp/
-
 # Jupyter
 .ipynb_checkpoints/
 *.ipynb
 
-# Coverage
+# Test & Coverage
 .coverage
 htmlcov/
-.pytest_cache/
-

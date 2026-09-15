@@ -1,0 +1,100 @@
+==============================================================================
+AgriDiff AI — Configuration & Environment Inventory
+Team: CODEAVENGERS | BIT-AI-001 | AGR-17
+Repository: AgriDiff AI
+==============================================================================
+
+This document catalogues every configuration file, runtime parameter, environment
+variable, and deployment manifest utilized throughout the AgriDiff AI ecosystem.
+
+------------------------------------------------------------------------------
+1. ENVIRONMENT CONFIGURATION MANIFESTS
+------------------------------------------------------------------------------
+
+File: .env.example.txt (Root template)
+Purpose: Canonical template defining all runtime variables and placeholders.
+Variables:
+  • GEMINI_API_KEY
+    - Description: Google Gemini API authorization key.
+    - Default / Fallback: If omitted or empty, backend seamlessly falls back to
+      deterministic rule-based comparison without failing.
+    - Required: No (Optional for advanced AI narrative generation).
+  • LLM_MODEL
+    - Description: Gemini model version identifier.
+    - Default: "gemini-1.5-flash"
+    - Alternate: "gemini-1.5-pro"
+  • LLM_TIMEOUT_SECONDS
+    - Description: Network request timeout before triggering deterministic fallback.
+    - Default: 30
+  • LLM_MAX_CONCURRENT
+    - Description: Max concurrent asynchronous API worker calls.
+    - Default: 5
+  • PORT
+    - Description: HTTP server bind port for FastAPI / Uvicorn.
+    - Default: 8000 (Dynamically mapped by cloud providers like Render).
+  • VITE_API_URL
+    - Description: Base URL for Axios HTTP requests from the React frontend.
+    - Default: Empty (Uses Vite development proxy to localhost:8000 in dev;
+      configured to Render backend URL in Vercel production).
+
+------------------------------------------------------------------------------
+2. BACKEND CONFIGURATION FILES
+------------------------------------------------------------------------------
+
+File: backend/requirements.txt
+Purpose: Pinned Python package dependencies for reproducible virtual environments.
+Managed By: pip
+Total Direct Packages: 16
+
+File: pytest.ini
+Purpose: Test runner configuration for discovery, asyncio loop handling, and warnings.
+Content:
+  [pytest]
+  testpaths = tests
+  python_files = test_*.py
+  asyncio_mode = strict
+
+File: backend/main.py (Runtime settings)
+Purpose: FastAPI ASGI application instantiation, CORS middleware, lifespan events.
+Settings:
+  • CORS allow_origins: ["*"] (Permits cross-origin requests from Vercel / localhost)
+  • Lifespan: Pre-warms embedding models during server startup.
+
+------------------------------------------------------------------------------
+3. FRONTEND CONFIGURATION FILES
+------------------------------------------------------------------------------
+
+File: frontend/package.json
+Purpose: Node.js package manifests, execution scripts (dev, build, preview), dependencies.
+Scripts:
+  • "dev": "vite" (Starts dev server at http://localhost:3000)
+  • "build": "vite build" (Compiles production assets to frontend/dist/)
+  • "preview": "vite preview" (Serves frontend/dist/ locally)
+
+File: frontend/package-lock.json
+Purpose: Cryptographically locked dependency tree ensuring bit-for-bit identical installs.
+Committed to Git: YES (Mandatory for reproducible CI/CD and production builds).
+
+File: frontend/vite.config.js
+Purpose: Vite bundler configuration, React plugin integration, proxy setup.
+Settings:
+  • server.port: 3000
+  • server.proxy: Proxies '/api' -> 'http://localhost:8000' during local development.
+
+File: frontend/vercel.json
+Purpose: Single-Page Application (SPA) routing rules for Vercel deployment.
+Settings:
+  • rewrites: Routes all client URLs to '/index.html' for React Router.
+
+File: frontend/tailwind.config.js & postcss.config.js
+Purpose: Tailwind CSS utility configuration, content paths, autoprefixer pipeline.
+
+------------------------------------------------------------------------------
+4. VERSION CONTROL & EXCLUSION MANIFESTS
+------------------------------------------------------------------------------
+
+File: .gitignore
+Purpose: Excludes all virtual environments, local node packages, build output,
+caches, temporary uploads, secrets, and large binary artifacts.
+Integrity: Verified to permit .env.example.txt and package-lock.json while strictly
+excluding sensitive or generated files.

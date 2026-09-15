@@ -150,6 +150,40 @@ python evaluation/eval.py --results data/benchmark_results.json --ground_truth d
 
 ---
 
+## ☁️ Cloud Deployment (Render & Vercel)
+
+AgriDiff AI is production-ready for automated multi-tier cloud deployment:
+
+* **Backend on Render (FastAPI Web Service):**
+  - Continuous deployment from GitHub with Python 3.11.
+  - Build command: `pip install -r backend/requirements.txt`
+  - Start command: `uvicorn backend.main:app --host 0.0.0.0 --port $PORT`
+  - Health check: `/api/health`
+  - Infrastructure-as-code: [`render.yaml`](render.yaml) included.
+* **Frontend on Vercel (Vite React SPA):**
+  - Root directory: `frontend`
+  - Build command: `npm run build` | Output directory: `dist`
+  - Environment variable: `VITE_API_URL=https://your-render-backend.onrender.com`
+  - SPA routing: [`frontend/vercel.json`](frontend/vercel.json) included.
+
+📖 **Detailed Step-by-Step Instructions:** [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)
+
+---
+
+## 📚 Documentation & Technical References
+
+| Guide | Description |
+|---|---|
+| 📖 **[docs/SETUP.md](docs/SETUP.md)** | Step-by-step reproducible workstation setup commands |
+| 📦 **[docs/DEPENDENCIES.md](docs/DEPENDENCIES.md)** | Complete Python and Node.js package inventory with exact versions |
+| ☁️ **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)** | Step-by-step production deployment guide for Render & Vercel |
+| 🛠️ **[docs/INSTALLATION_TROUBLESHOOTING.md](docs/INSTALLATION_TROUBLESHOOTING.md)** | Troubleshooting venv, ports, node_modules, OCR, and fallbacks |
+| 📁 **[project_inventory/NON_GIT_ARTIFACTS.txt](project_inventory/NON_GIT_ARTIFACTS.txt)** | Inventory of non-git files, reasons, and recreation steps |
+| ⚙️ **[project_inventory/CONFIGURATION_INVENTORY.txt](project_inventory/CONFIGURATION_INVENTORY.txt)** | Catalog of configuration manifests and environment variables |
+| 🔑 **[.env.example.txt](.env.example.txt)** | Safe environment template with variable placeholders |
+
+---
+
 ## 👥 Team CODEAVENGERS (BIT-AI-001)
 
 | Member | Role & Department | Ownership |
