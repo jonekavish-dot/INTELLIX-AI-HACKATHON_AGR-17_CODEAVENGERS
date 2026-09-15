@@ -213,6 +213,7 @@ def validate_and_assemble_results(
             new_page=new_chunk.get("page_start") if new_chunk else None,
             summary=llm.get("summary", f"Change detected in {sec_title}"),
             interpretation=llm.get("interpretation", "Review for operational or legal implications."),
+            operational_note=llm.get("operational_note"),
             impact=impact,
             evidence_status=ev_status,
             confidence=round(confidence, 3),

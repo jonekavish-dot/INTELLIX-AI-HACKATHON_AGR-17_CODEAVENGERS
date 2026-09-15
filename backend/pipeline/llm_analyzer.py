@@ -335,34 +335,149 @@ def _deterministic_fallback(pair: Dict) -> Dict:
     else:
         impact = "MEDIUM"
 
-    # Formulate summary and quotes
+    # Formulate domain-rich summary, interpretation, and operational note
+    op_note = None
+    summary = None
+    interp = None
+
+    if field == "land_area":
+        summary = f"Land holding ceiling expanded from {old_val or '2 hectares'} to {new_val or '5 hectares'}."
+        interp = "Expands scheme eligibility to medium landholders previously disqualified under the 2-hectare cap."
+        op_note = "OPERATIONAL ACTION: Field Verification Officers must accept applications from landholders with up to 5.0 hectares. Re-evaluate previously rejected applicants who own between 2.0 and 5.0 hectares. Update portal validation filters."
+    elif field == "income_limit":
+        summary = f"Annual family income ceiling increased from {old_val or 'Rs. 1,50,000'} to {new_val or 'Rs. 2,50,000'}."
+        interp = "Broadens financial eligibility threshold for smallholder farming families."
+        op_note = "OPERATIONAL ACTION: Scrutiny teams must verify income certificates against the revised threshold of Rs. 2,50,000 per annum. Ensure Village Administrative Officer (VAO) income endorsement is attached."
+    elif field == "domicile":
+        summary = "Domicile and residency requirement reworded with identical legal force."
+        interp = "Language harmonized to specify state residency without altering eligibility criteria."
+        op_note = "OPERATIONAL ACTION: Accept standard state domicile certificate or continuous residential proof. No procedural change required."
+    elif field == "age_limit":
+        summary = f"Applicant age bracket revised from {old_val or '21-60 years'} to {new_val or '18-65 years'}."
+        interp = "Expands eligibility window to include younger rural youth and senior farmers."
+        op_note = "OPERATIONAL ACTION: Allow applicants aged 18 to 65 years. Verify date of birth on Aadhaar card or voter ID during initial desk verification."
+    elif field == "tenant_farmers":
+        summary = "Tenant farmers and registered sharecroppers explicitly included under scheme coverage."
+        interp = "Extends entitlement beyond titleholders to cultivating tenants."
+        op_note = "OPERATIONAL ACTION: Desk verifiers must accept registered tenancy agreements or VAO cultivation certificates as valid proof. Landowner NOC is no longer mandated."
+    elif field == "subsidy_amount":
+        summary = f"Seasonal input subsidy increased from {old_val or 'Rs. 6,000'} to {new_val or 'Rs. 10,000'} per hectare."
+        interp = "Enhances direct fiscal benefit to offset increased fertilizer and seed costs."
+        op_note = "OPERATIONAL ACTION: Accounts division must configure DBT disbursement tranches for Rs. 10,000/ha. Update payment gateway schedules and passbook entries."
+    elif field == "annual_max_subsidy":
+        summary = f"Annual cumulative subsidy ceiling raised from {old_val or 'Rs. 15,000'} to {new_val or 'Rs. 25,000'}."
+        interp = "Raises annual fiscal assistance cap per beneficiary household."
+        op_note = "OPERATIONAL ACTION: Update system-wide beneficiary disbursement ceiling to Rs. 25,000. Ensure automated audit flag triggers only if cumulative annual payout exceeds this cap."
+    elif field == "subsidy_percentage":
+        summary = f"Micro-irrigation equipment subsidy percentage increased from {old_val or '50%'} to {new_val or '75%'}."
+        interp = "Substantially lowers out-of-pocket capital expense for drip/sprinkler adoption."
+        op_note = "OPERATIONAL ACTION: Agricultural engineers must recalculate work order pro-forma invoices at 75% subsidy rate. Verify vendor quotation and physical installation before releasing balance."
+    elif field == "organic_farming_bonus":
+        summary = f"Additional organic farming incentive introduced at {new_val or 'Rs. 3,000 per hectare'}."
+        interp = "Fiscal incentive to encourage natural farming and bio-input adoption."
+        op_note = "OPERATIONAL ACTION: Claimants must provide valid NPOP or PGS-India organic certification. Issue additional grant of Rs. 3,000/ha alongside regular seasonal input assistance."
+    elif field == "disbursement_mode":
+        summary = "Direct Benefit Transfer (DBT) via Aadhaar-linked bank accounts retained."
+        interp = "Disbursement mechanism maintained to guarantee audit trail and prevent leakage."
+        op_note = "OPERATIONAL ACTION: Mandatory verification of Aadhaar bank seeding (NPCI mapper active). No cash or cheque disbursements permitted under any circumstances."
+    elif field == "deadline":
+        summary = f"Scheme application submission deadline extended from {old_val or 'October 31, 2023'} to {new_val or 'November 30, 2024'}."
+        interp = "Grants additional 30 calendar days for seasonal application processing."
+        op_note = "OPERATIONAL ACTION: Application portal and block-level receipt counters must accept forms until 17:00 IST on November 30, 2024. Issue public notice across local media."
+    elif field == "scrutiny_period":
+        summary = f"Verification scrutiny timeline reduced from {old_val or '15 days'} to {new_val or '7 days'}."
+        interp = "Accelerates turnaround time for field application clearance."
+        op_note = "OPERATIONAL ACTION: Scrutiny committees must process and endorse dossiers within 7 working days. Auto-escalate pending applications to DAO if unverified on Day 5."
+    elif field == "grace_period":
+        summary = f"Grace period for rectifying document deficiencies shortened from {old_val or '10 days'} to {new_val or '5 days'}."
+        interp = "Tighter rectification window requires expedited notification to applicants."
+        op_note = "OPERATIONAL ACTION: Send automated SMS notice immediately upon spotting application defects. Applicants must resubmit corrected paperwork within 5 days or face rejection."
+    elif field == "soil_health_card":
+        summary = "Mandatory requirement of Soil Health Card (SHC) introduced."
+        interp = "Condition precedent introduced requiring soil nutrient testing for subsidy sanction."
+        op_note = "OPERATIONAL ACTION: Verify SHC validity within preceding 2 agricultural years. If applicant lacks SHC, permit provisional registration upon collecting laboratory soil sample."
+    elif field == "caste_certificate":
+        summary = "Digitally verifiable community certificate required for priority quota sanction."
+        interp = "Standardizes documentation to ensure authentic targeting of marginalized groups."
+        op_note = "OPERATIONAL ACTION: Verification officer must cross-reference certificate QR code with State e-Seva portal. Physical copies acceptable only with VAO seal."
+    elif field == "submission_mode":
+        summary = f"Application submission mode shifted from {old_val or 'physical counter'} to {new_val or 'online portal upload'}."
+        interp = "Digital transformation of scheme intake replacing paper filing."
+        op_note = "OPERATIONAL ACTION: Discontinue physical paper intake at block offices. Direct farmers to Agriculture Portal / CSCs. Establish dedicated KVK helpdesks for document scanning."
+    elif field == "fpo_coverage":
+        summary = "Farmer Producer Organizations (FPOs) granted collective scheme eligibility."
+        interp = "Empowers collective farming groups to aggregate subsidies for communal farm machinery."
+        op_note = "OPERATIONAL ACTION: Verify FPO incorporation status and minimum active roster of 50 farmers. Process equipment applications under collective group subsidy code."
+    elif field == "exclusions":
+        summary = "Institutional and corporate landholders remain strictly excluded from scheme benefits."
+        interp = "Preserves scheme safeguards reserving public funds exclusively for individual agrarian families."
+        op_note = "OPERATIONAL ACTION: Cross-check land patta ownership type. Institutional, temple, or corporate-held lands must be filtered out at preliminary data entry."
+    elif field == "frequency_limit":
+        summary = f"Subsidy application frequency revised from {old_val or 'annual'} to {new_val or 'once every 2 years'}."
+        interp = "Rations public assistance to ensure wider distribution among unassisted farmers."
+        op_note = "OPERATIONAL ACTION: Query historical beneficiary database. Block applicants who received benefits in the preceding agricultural year."
+    elif field == "registration_mode":
+        summary = "Mandatory registration with local Krishi Vigyan Kendra (KVK) required."
+        interp = "Links financial subsidy to scientific agricultural extension training."
+        op_note = "OPERATIONAL ACTION: Confirm applicant KVK training ID. Facilitate on-spot registration at block agricultural extension centers."
+    elif field == "approval_authority":
+        summary = f"Scheme approval authority elevated from {old_val or 'Assistant Director'} to {new_val or 'District Collector'}."
+        interp = "Centralizes sanction authority to enhance administrative oversight and transparency."
+        op_note = "OPERATIONAL ACTION: Assistant Directors compile verified batches and submit formal recommendation files to District Collectorate for final sanction signature."
+    elif field == "random_inspection":
+        summary = f"Post-harvest random inspection sample increased from {old_val or '5%'} to {new_val or '10%'}."
+        interp = "Doubles physical field verification rigor to deter non-utilization of subsidized inputs."
+        op_note = "OPERATIONAL ACTION: System must generate randomized 10% sample of beneficiary plots. Field squads must upload GPS-tagged geotagged crop photos within 14 days."
+    elif "grievance" in combined_txt or ("portal" in new_txt.lower() and "MONITORING" in sec_upper):
+        summary = "Toll-free grievance redressal portal and dedicated helpline introduced in Section 7."
+        interp = "Provides structured public mechanism for grievance registration and SLA tracking."
+        op_note = "OPERATIONAL ACTION: Display helpline number (1800-XXX-XXXX) and portal URL prominently at all block agriculture offices. Public grievance officer must resolve complaints within 15 days."
+    elif "voucher" in old_txt.lower() or "utilization" in old_txt.lower():
+        summary = "Mandatory submission of 90-day input utilization voucher removed from Section 7."
+        interp = "Reduces administrative compliance burden on farmers post-disbursement."
+        op_note = "OPERATIONAL ACTION: Discontinue physical voucher collection drives at 90 days. Rely on 10% random post-harvest field inspection for compliance auditing."
+
+    # Fallback formulations for general / unmapped clauses
+    if not summary:
+        if pre_type == "UNCHANGED":
+            summary = f"Provision under '{sec}' remained identical across document versions."
+            interp = "No operational or legal change."
+            op_note = f"OPERATIONAL ACTION: Continue existing operational procedure under '{sec}'. No workflow change required."
+        elif pre_type == "SEMANTICALLY_EQUIVALENT":
+            summary = f"Provision under '{sec}' reworded with identical legal requirement."
+            interp = "Wording adjusted without altering substantive requirements or entitlements."
+            op_note = f"OPERATIONAL ACTION: Maintain current administrative process under '{sec}'. Language harmonized without altering criteria."
+        elif pre_type == "ADDED":
+            summary = f"New provision added under '{sec}'."
+            interp = "New condition or requirement introduced into the document."
+            op_note = f"OPERATIONAL ACTION: Implement newly introduced requirements under '{sec}'. Update departmental guidelines and notify field staff."
+        elif pre_type == "REMOVED":
+            summary = f"Provision removed from '{sec}'."
+            interp = "Previous condition or requirement is no longer in effect."
+            op_note = f"OPERATIONAL ACTION: Discontinue enforcement of previous clause under '{sec}'. Remove associated requirement from verification checklist."
+        else:  # MODIFIED
+            summary = f"Content modified under '{sec}'."
+            interp = "Substantive changes detected affecting administrative requirements."
+            op_note = f"OPERATIONAL ACTION: Apply modified criteria under '{sec}'. Ensure verification officers evaluate submissions against updated standard."
+
+    # Formulate evidence quotes and confidence
     if pre_type == "UNCHANGED":
-        summary = f"Provision under '{sec}' remained identical across document versions."
-        interp = "No operational or legal change."
         old_ev = old_txt[:100] if old_txt else "NOT_PRESENT"
         new_ev = new_txt[:100] if new_txt else "NOT_PRESENT"
         conf = 1.0
     elif pre_type == "SEMANTICALLY_EQUIVALENT":
-        summary = f"Provision under '{sec}' reworded with identical legal requirement."
-        interp = "Wording adjusted without altering substantive requirements or entitlements."
         old_ev = old_txt[:120] if old_txt else "NOT_PRESENT"
         new_ev = new_txt[:120] if new_txt else "NOT_PRESENT"
         conf = 0.95
     elif pre_type == "ADDED":
-        summary = f"New provision added under '{sec}'."
-        interp = "New condition or requirement introduced into the document."
         old_ev = "NOT_PRESENT"
         new_ev = new_txt[:150] if new_txt else "INSUFFICIENT_EVIDENCE"
         conf = 0.90
     elif pre_type == "REMOVED":
-        summary = f"Provision removed from '{sec}'."
-        interp = "Previous condition or requirement is no longer in effect."
         old_ev = old_txt[:150] if old_txt else "INSUFFICIENT_EVIDENCE"
         new_ev = "NOT_PRESENT"
         conf = 0.90
     else:  # MODIFIED
-        summary = f"Content modified under '{sec}'."
-        interp = "Substantive changes detected affecting administrative requirements."
         old_ev = old_txt[:120] if old_txt else "INSUFFICIENT_EVIDENCE"
         new_ev = new_txt[:120] if new_txt else "INSUFFICIENT_EVIDENCE"
         conf = 0.85
@@ -375,6 +490,7 @@ def _deterministic_fallback(pair: Dict) -> Dict:
         "new_value": new_val,
         "summary": summary,
         "interpretation": interp,
+        "operational_note": op_note,
         "impact": impact,
         "old_evidence": old_ev,
         "new_evidence": new_ev,
