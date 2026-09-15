@@ -49,3 +49,4 @@ def test_a07_status_unknown_job():
 def test_a10_results_unknown_job():
     response = client.get("/api/results/non-existent-job-id")
     assert response.status_code == 404
+

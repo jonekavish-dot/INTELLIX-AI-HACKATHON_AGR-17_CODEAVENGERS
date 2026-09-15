@@ -202,3 +202,4 @@ def test_u38_canonical_change_schema():
     )
     assert change.change_id == "CH-001"
     assert change.impact == "HIGH"
+
