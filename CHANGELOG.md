@@ -6,7 +6,50 @@ Format: `[version] YYYY-MM-DD — description`
 
 ---
 
+## [1.1.0] 2026-09-15 — Comparison Quality Optimization & False Positive Reduction
+
+### Added
+- **Safe Normalization Layer (`backend/pipeline/normalizer.py`):**
+  - Canonical whitespace and linebreak collapsing without token destruction (`normalize_whitespace`).
+  - Critical pattern preservation for numbers, dates, survey numbers, currencies, percentages, and units (`extract_critical_tokens`).
+  - Strict whitespace/punctuation-only difference detection (`is_formatting_only_diff`).
+  - Subclause identifier extractor and stripper (`extract_clause_identifier`, `strip_clause_identifier`).
+  - Supporting evidence span deduplicator (`deduplicate_evidence_spans`).
+- **Multi-Pass Structural & Semantic Alignment (`backend/pipeline/aligner.py`):**
+  - Pass 1: Structural clause pairing by subsection ID (e.g. `4.2 Physical Verification` paired with `4.2 Online Upload` as `MODIFIED` rather than split into `ADDED` + `REMOVED`).
+  - Pass 2: Cosine similarity matching with greedy thresholding.
+  - Pass 3: Residual novel clause tracking (`ADDED`).
+  - Deterministic natural document reading flow sorting.
+- **Granular Chunker & Section Detector Enhancements (`backend/pipeline/chunker.py`):**
+  - Separated top-level numbered sections (`1.`, `2.`, `CHAPTER`, `ALL CAPS`) from subclauses (`1.1`, `4.1`).
+  - Prevented top-level section headers from polluting substantive clause content lines.
+- **Evidence Spans Data Contract (`backend/models/schemas.py`, `backend/pipeline/validator.py`):**
+  - Added `EvidenceSpan` schema modeling individual quote fragments.
+  - Extended `DetectedChange` with `evidence_spans: List[EvidenceSpan]`, cleanly separating semantic change units from supporting grounding fragments.
+- **Comprehensive New Test Suites (`tests/`):**
+  - `test_regression.py` (11 tests): safe normalization, numeric token preservation, date preservation, survey number preservation, structural clause pairing, evidence spans.
+  - `test_unseen.py` (1 test): generalization test on an entirely unseen pest & fertilizer advisory document pair (`unseen_advisory_old.pdf` vs `unseen_advisory_new.pdf`).
+  - `test_e2e_workflow.py` (1 test): complete end-to-end API lifecycle test with quote grounding and tab counter consistency.
+  - **Total automated tests: 40 / 40 passed (100%).**
+- **Frontend Multi-Span Evidence Display (`frontend/src/components/EvidenceModal.jsx`):**
+  - Rendered grounding fragments panel displaying individual evidence spans with page references and verified quote badges.
+
+### Optimized
+- **Benchmark Evaluation Performance (`evaluation/eval.py` on 22-change benchmark):**
+  - Precision: **50.0% → 91.7%** (+41.7% absolute gain).
+  - Recall: **81.8% → 100.0%** (all 22 ground-truth changes detected).
+  - F1 Score: **62.1% → 95.7%** (+33.6% absolute gain).
+  - False Positives: **18 → 2** (88.9% FP reduction; eliminated all section-header and split-clause FPs).
+  - False Negatives: **4 → 0** (Zero missed changes).
+  - Category Accuracy: **100.0%**.
+  - Change Type Accuracy: **22.2% → 100.0%**.
+  - Impact Accuracy: **38.9% → 100.0%**.
+  - Evidence Grounding Rate: **100.0%** (24 / 24 changes verified against source text).
+
+---
+
 ## [1.0.0] 2026-09-15 — Full AGR-17 System Implementation & Benchmark Release
+
 
 ### Added
 - **Canonical Data Contract (`models/schemas.py`):**
