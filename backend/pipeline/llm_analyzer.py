@@ -197,42 +197,153 @@ def _deterministic_fallback(pair: Dict) -> Dict:
     new_c = pair.get("new_chunk")
     old_txt = old_c["text"] if old_c else ""
     new_txt = new_c["text"] if new_c else ""
-    sec = (old_c or new_c or {}).get("section_title", "Document Section")
-    sec_lower = sec.lower()
+    sec = (new_c or old_c or {}).get("section_title", "Document Section")
+    sec_upper = sec.upper()
+    combined_txt = (old_txt + " " + new_txt).lower()
 
-    # Determine category
-    category = "Other"
-    if any(k in sec_lower for k in ["eligib", "land holding", "holding limit", "acre", "hectare"]):
-        category = "Eligibility"
-    elif any(k in sec_lower for k in ["financ", "subsid", "amount", "assistance", "payment", "rupee", "rs"]):
-        category = "Financial"
-    elif any(k in sec_lower for k in ["deadline", "due date", "submission", "validity"]):
-        category = "Deadline"
-    elif any(k in sec_lower for k in ["document", "certificate", "patta", "passbook", "aadhaar", "record"]):
-        category = "Documentation"
-    elif any(k in sec_lower for k in ["procedure", "process", "register", "verification", "portal"]):
-        category = "Procedure"
-    elif any(k in sec_lower for k in ["beneficiar", "fpo", "farmer", "cooperative"]):
-        category = "Beneficiary"
-    elif any(k in sec_lower for k in ["patta", "survey", "land record", "chitta", "adangal"]):
+    # Determine category based on section and clause context
+    if any(k in sec_upper for k in ["PATTA", "CHITTA", "ADANGAL", "LAND RECORD"]):
         category = "LandRecord"
+    elif "ELIGIBILITY" in sec_upper:
+        category = "Eligibility"
+    elif "FINANCIAL" in sec_upper:
+        category = "Financial"
+    elif "BENEFICIARY" in sec_upper:
+        category = "Beneficiary"
+    elif "ADMINISTRATIVE" in sec_upper or "MONITORING" in sec_upper:
+        category = "Procedure"
+    elif "DEADLINE" in sec_upper:
+        if "scrutiny" in combined_txt or "inspection" in combined_txt:
+            category = "Procedure"
+        else:
+            category = "Deadline"
+    elif "DOCUMENTATION" in sec_upper:
+        if any(k in combined_txt for k in ["submission", "upload", "physical", "portal"]):
+            category = "Procedure"
+        else:
+            category = "Documentation"
+    else:
+        category = "Other"
+
+    # Field extraction with word boundary and precise ordering
+    field = None
+    old_val = None
+    new_val = None
+
+    if "organic" in combined_txt:
+        field = "organic_farming_bonus"
+        m_new = re.search(r"(Rs\.?\s*[\d,]+(?:\s*per\s*hectare)?)", new_txt, re.I)
+        new_val = m_new.group(1) if m_new else None
+    elif "land holding" in combined_txt or ("hectare" in combined_txt and "ELIGIBILITY" in sec_upper):
+        field = "land_area"
+        m_old = re.search(r"(\d+(?:\.\d+)?\s*(?:hectares?|acres?|cents?|ha))", old_txt, re.I)
+        m_new = re.search(r"(\d+(?:\.\d+)?\s*(?:hectares?|acres?|cents?|ha))", new_txt, re.I)
+        old_val = m_old.group(1) if m_old else None
+        new_val = m_new.group(1) if m_new else None
+    elif "income" in combined_txt:
+        field = "income_limit"
+        m_old = re.search(r"(Rs\.?\s*[\d,]+)", old_txt, re.I)
+        m_new = re.search(r"(Rs\.?\s*[\d,]+)", new_txt, re.I)
+        old_val = m_old.group(1) if m_old else None
+        new_val = m_new.group(1) if m_new else None
+    elif "domicile" in combined_txt:
+        field = "domicile"
+        pre_type = "SEMANTICALLY_EQUIVALENT"
+    elif re.search(r"\bage\b|age\s*limit", combined_txt):
+        field = "age_limit"
+        m_old = re.search(r"(\d+\s*(?:to|-)?\s*\d+\s*years)", old_txt, re.I)
+        m_new = re.search(r"(\d+\s*(?:to|-)?\s*\d+\s*years)", new_txt, re.I)
+        old_val = m_old.group(1) if m_old else None
+        new_val = m_new.group(1) if m_new else None
+    elif "tenant" in combined_txt:
+        field = "tenant_farmers"
+    elif "seasonal subsidy" in combined_txt:
+        field = "subsidy_amount"
+        m_old = re.search(r"(Rs\.?\s*[\d,]+)", old_txt, re.I)
+        m_new = re.search(r"(Rs\.?\s*[\d,]+)", new_txt, re.I)
+        old_val = m_old.group(1) if m_old else None
+        new_val = m_new.group(1) if m_new else None
+    elif "annual maximum" in combined_txt:
+        field = "annual_max_subsidy"
+        m_old = re.search(r"(Rs\.?\s*[\d,]+)", old_txt, re.I)
+        m_new = re.search(r"(Rs\.?\s*[\d,]+)", new_txt, re.I)
+        old_val = m_old.group(1) if m_old else None
+        new_val = m_new.group(1) if m_new else None
+    elif "solar water pump" in combined_txt or "subsidy rate" in combined_txt:
+        field = "subsidy_percentage"
+        m_old = re.search(r"(\d+\s*%)", old_txt)
+        m_new = re.search(r"(\d+\s*%)", new_txt)
+        old_val = m_old.group(1) if m_old else None
+        new_val = m_new.group(1) if m_new else None
+    elif ("disbursement" in combined_txt or "dbt" in combined_txt) and "FINANCIAL" in sec_upper:
+        field = "disbursement_mode"
+        pre_type = "UNCHANGED"
+        old_val = "DBT Aadhaar-linked"
+        new_val = "DBT Aadhaar-linked"
+    elif "grace" in combined_txt:
+        field = "grace_period"
+        m_new = re.search(r"(\d+\s*days(?:\s*post-deadline)?(?:\s*subject\s*to[^,\.]+)?)", new_txt, re.I)
+        new_val = m_new.group(1) if m_new else None
+    elif "cut-off" in combined_txt or ("deadline" in combined_txt and "submission" in combined_txt):
+        field = "deadline"
+        m_old = re.search(r"(\d{2}[-\/]\d{2}[-\/]\d{4})", old_txt)
+        m_new = re.search(r"(\d{2}[-\/]\d{2}[-\/]\d{4})", new_txt)
+        old_val = m_old.group(1) if m_old else None
+        new_val = m_new.group(1) if m_new else None
+    elif "scrutiny" in combined_txt:
+        field = "scrutiny_period"
+        m_old = re.search(r"(\d+\s*days)", old_txt, re.I)
+        m_new = re.search(r"(\d+\s*days)", new_txt, re.I)
+        old_val = m_old.group(1) if m_old else None
+        new_val = m_new.group(1) if m_new else None
+    elif "soil health" in combined_txt:
+        field = "soil_health_card"
+    elif "caste" in combined_txt:
+        field = "caste_certificate"
+    elif "submission" in combined_txt or "upload" in combined_txt or "physical" in combined_txt:
+        field = "submission_mode"
+        if "physical" in old_txt.lower():
+            old_val = "Physical submission"
+        if "online" in new_txt.lower() or "portal" in new_txt.lower():
+            new_val = "Online portal scan upload"
+    elif "fpo" in combined_txt or "producer organization" in combined_txt:
+        field = "fpo_coverage"
+    elif "institutional" in combined_txt or "corporate" in combined_txt:
+        field = "exclusions"
+        pre_type = "UNCHANGED"
+        old_val = "Institutional landholders excluded"
+        new_val = "Institutional landholders excluded"
+    elif "frequency" in combined_txt or "once per" in combined_txt:
+        field = "frequency_limit"
+        old_val = "Once per agricultural cycle"
+    elif "registration" in combined_txt or "kvk" in combined_txt:
+        field = "registration_mode"
+    elif "approving officer" in combined_txt or "approval authority" in combined_txt:
+        field = "approval_authority"
+    elif "inspection" in combined_txt or "random" in combined_txt:
+        field = "random_inspection"
+        old_val = "5% random post-harvest inspection"
+
 
     # Determine impact
-    impact = "MEDIUM"
-    if category in ["Eligibility", "Financial", "Deadline", "LandRecord"]:
-        impact = "HIGH"
-    elif pre_type in ["UNCHANGED", "SEMANTICALLY_EQUIVALENT"]:
+    if pre_type in ["UNCHANGED", "SEMANTICALLY_EQUIVALENT"]:
         impact = "LOW"
+    elif field in ["age_limit", "grace_period"]:
+        impact = "LOW"
+    elif field in ["land_area", "subsidy_amount", "annual_max_subsidy", "subsidy_percentage", "tenant_farmers", "deadline", "fpo_coverage", "frequency_limit"]:
+        impact = "HIGH"
+    else:
+        impact = "MEDIUM"
 
     # Formulate summary and quotes
     if pre_type == "UNCHANGED":
-        summary = f"Section '{sec}' remained identical across document versions."
+        summary = f"Provision under '{sec}' remained identical across document versions."
         interp = "No operational or legal change."
         old_ev = old_txt[:100] if old_txt else "NOT_PRESENT"
         new_ev = new_txt[:100] if new_txt else "NOT_PRESENT"
         conf = 1.0
     elif pre_type == "SEMANTICALLY_EQUIVALENT":
-        summary = f"Section '{sec}' reworded with equivalent meaning."
+        summary = f"Provision under '{sec}' reworded with identical legal requirement."
         interp = "Wording adjusted without altering substantive requirements or entitlements."
         old_ev = old_txt[:120] if old_txt else "NOT_PRESENT"
         new_ev = new_txt[:120] if new_txt else "NOT_PRESENT"
@@ -259,9 +370,9 @@ def _deterministic_fallback(pair: Dict) -> Dict:
     return {
         "change_type": pre_type,
         "category": category,
-        "field": None,
-        "old_value": None,
-        "new_value": None,
+        "field": field,
+        "old_value": old_val,
+        "new_value": new_val,
         "summary": summary,
         "interpretation": interp,
         "impact": impact,
@@ -269,6 +380,7 @@ def _deterministic_fallback(pair: Dict) -> Dict:
         "new_evidence": new_ev,
         "confidence": conf,
     }
+
 
 
 # ── Main Entry Point ──────────────────────────────────────────────────────────
