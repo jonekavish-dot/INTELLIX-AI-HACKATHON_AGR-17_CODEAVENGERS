@@ -5,6 +5,13 @@ BIT-AI-001 | AGR-17 | Team CODEAVENGERS
 """
 
 import os
+import sys
+
+# Ensure backend directory is in sys.path regardless of working directory
+_backend_dir = os.path.dirname(os.path.abspath(__file__))
+if _backend_dir not in sys.path:
+    sys.path.insert(0, _backend_dir)
+
 import uuid
 import time
 import asyncio
