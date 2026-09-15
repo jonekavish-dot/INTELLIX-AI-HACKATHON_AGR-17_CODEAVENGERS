@@ -62,6 +62,7 @@ temp/
 /models/
 !backend/models/
 !backend/models/**
+backend/models/__pycache__/
 *.bin
 *.safetensors
 
