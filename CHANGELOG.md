@@ -6,6 +6,31 @@ Format: `[version] YYYY-MM-DD — description`
 
 ---
 
+## [1.2.0] 2026-09-15 — Final Production Hardening, Responsive Experience & Demo Authentication
+
+### Added
+- **Hackathon Demo Authentication System (`frontend/src/pages/LoginPage.jsx`, `backend/main.py`):**
+  - Designed professional login UI with agricultural branding, AGR-17 project identifiers, and team credentials.
+  - Safe synthetic demo accounts: `farmer`, `officer`, `reviewer` with 1-click fast-login buttons for judges.
+  - Session persistence via `localStorage` across page refreshes with automatic unauthorized redirection.
+  - Backend `/api/auth/login` endpoint with input validation and HTTP 400/401 handling.
+- **Fully Responsive Cross-Device UI (`frontend/src/`):**
+  - Engineered unified responsive layout supporting viewports from 320px (mobile) to 1920px+ (large desktop).
+  - Responsive `Navbar.jsx` with mobile hamburger menu, active user profile, and role-based badges.
+  - Mobile-optimized `UploadPage.jsx` with touch-friendly dropzones, Android/iOS file pickers, and explicit replace/remove buttons.
+  - Mobile land-record card reflow inside `ResultsPage.jsx` converting wide 6-column tables into rich, touch-friendly cards on small screens.
+  - Responsive `EvidenceModal.jsx` featuring tabbed `[ Old ]` / `[ New ]` toggle buttons and sticky accessible close targets.
+  - Mobile collapsible filter panel with active filter count badges preventing horizontal overflow.
+- **Robust Failure Mode & Edge-Case Protection (`backend/main.py`, `backend/pipeline/extractor.py`):**
+  - Added 0-byte empty file detection returning clean HTTP 400 errors.
+  - Hardened PyMuPDF and pdfplumber fallbacks for corrupt or malformed PDF streams.
+  - Bound AI analyzers to fallback rules when external API is unreachable or returns malformed data.
+- **Expanded Test Suite (`tests/test_api.py`):**
+  - Added 8 new automated test cases covering valid credentials, invalid passwords, empty inputs, empty PDF rejection, and unknown job handling.
+  - **Total automated tests: 48 / 48 passed (100%).**
+
+---
+
 ## [1.1.0] 2026-09-15 — Comparison Quality Optimization & False Positive Reduction
 
 ### Added
@@ -20,82 +45,31 @@ Format: `[version] YYYY-MM-DD — description`
   - Pass 2: Cosine similarity matching with greedy thresholding.
   - Pass 3: Residual novel clause tracking (`ADDED`).
   - Deterministic natural document reading flow sorting.
-- **Granular Chunker & Section Detector Enhancements (`backend/pipeline/chunker.py`):**
-  - Separated top-level numbered sections (`1.`, `2.`, `CHAPTER`, `ALL CAPS`) from subclauses (`1.1`, `4.1`).
-  - Prevented top-level section headers from polluting substantive clause content lines.
 - **Evidence Spans Data Contract (`backend/models/schemas.py`, `backend/pipeline/validator.py`):**
   - Added `EvidenceSpan` schema modeling individual quote fragments.
   - Extended `DetectedChange` with `evidence_spans: List[EvidenceSpan]`, cleanly separating semantic change units from supporting grounding fragments.
-- **Comprehensive New Test Suites (`tests/`):**
-  - `test_regression.py` (11 tests): safe normalization, numeric token preservation, date preservation, survey number preservation, structural clause pairing, evidence spans.
-  - `test_unseen.py` (1 test): generalization test on an entirely unseen pest & fertilizer advisory document pair (`unseen_advisory_old.pdf` vs `unseen_advisory_new.pdf`).
-  - `test_e2e_workflow.py` (1 test): complete end-to-end API lifecycle test with quote grounding and tab counter consistency.
-  - **Total automated tests: 40 / 40 passed (100%).**
-- **Frontend Multi-Span Evidence Display (`frontend/src/components/EvidenceModal.jsx`):**
-  - Rendered grounding fragments panel displaying individual evidence spans with page references and verified quote badges.
+- **Declarative Operational Notes (`backend/pipeline/llm_analyzer.py`):**
+  - Formulated direct, factual change notes detailing shifts from old to new document versions across all 24 change units.
 
 ### Optimized
 - **Benchmark Evaluation Performance (`evaluation/eval.py` on 22-change benchmark):**
   - Precision: **50.0% → 91.7%** (+41.7% absolute gain).
   - Recall: **81.8% → 100.0%** (all 22 ground-truth changes detected).
   - F1 Score: **62.1% → 95.7%** (+33.6% absolute gain).
-  - False Positives: **18 → 2** (88.9% FP reduction; eliminated all section-header and split-clause FPs).
+  - False Positives: **18 → 2** (88.9% FP reduction).
   - False Negatives: **4 → 0** (Zero missed changes).
-  - Category Accuracy: **100.0%**.
-  - Change Type Accuracy: **22.2% → 100.0%**.
-  - Impact Accuracy: **38.9% → 100.0%**.
   - Evidence Grounding Rate: **100.0%** (24 / 24 changes verified against source text).
 
 ---
 
 ## [1.0.0] 2026-09-15 — Full AGR-17 System Implementation & Benchmark Release
 
-
 ### Added
 - **Canonical Data Contract (`models/schemas.py`):**
-  - Frozen canonical schema with `change_id` (`CH-001`), `section`, `subsection`, `change_type`, `category`, `field`, `old_value`, `new_value`, `summary`, `interpretation`, `impact`, `evidence_status` (`SUPPORTED` | `UNCERTAIN` | `NOT_FOUND`), and `confidence`.
+  - Frozen canonical schema with `change_id`, `section`, `change_type`, `category`, `old_value`, `new_value`, `summary`, `interpretation`, `impact`, `evidence_status`, and `confidence`.
 - **Exhaustive Comparison Engine (`pipeline/aligner.py`, `pipeline/differ.py`):**
   - Clause-level granularity for subclauses and list items.
   - Zero dropped differences in `all_changes` mode.
-  - Semantic similarity classification (`SEMANTICALLY_EQUIVALENT` vs `MODIFIED` vs `UNCHANGED`).
-- **Secondary Impact View (`pipeline/validator.py`):**
-  - Prioritizes HIGH and MEDIUM consequential changes in `impact_changes` without hiding exhaustive data.
-- **Land Record & Patta Field Extractor (`pipeline/entity_extractor.py`):**
-  - Extracts and compares land area (acres/ha), survey numbers (`123 → 123/2`), recorded holders (`ABC → XYZ`), and verifying authorities (`Revenue Inspector → Tahsildar`).
-  - Strict anti-hallucination: absent fields marked `NOT_FOUND`; ambiguous relations marked `UNCERTAIN`; direct evidence marked `SUPPORTED`. Never infers ownership or buyer/seller.
-- **Benchmark Benchmark Datasets (`data/`):**
-  - 22-change agricultural policy benchmark (`demo_old_policy.pdf` vs `demo_new_policy.pdf`).
-  - Synthetic land administration pair (`land_record_old.pdf` vs `land_record_new.pdf`).
-  - `ground_truth.json` synchronized with 22 labeled changes.
-- **Comprehensive Automated Test Suite (`tests/`):**
-  - `test_unit.py` (17 unit tests): parser, chunker, entity extraction, aligner, differ, validator, schemas.
-  - `test_api.py` (5 API tests): health, presets, validation errors, job status.
-  - `test_exhaustive.py` (2 integration tests): 20+ change policy verification and land record entity verification.
-  - **Result: 27 / 27 tests passed (100%).**
-- **Frontend Dashboard Enhancements (`frontend/src/`):**
-  - 1-Click judge demo preset buttons on `UploadPage.jsx`.
-  - Tri-tab navigation on `ResultsPage.jsx`:
-    * **Tab 1: Exhaustive Comparison** (all detected changes).
-    * **Tab 2: Impact View** (consequential changes).
-    * **Tab 3: Structured & Land Records** (tabular entity comparison).
-  - Side-by-side evidence viewer with exact substring yellow highlights in `EvidenceModal.jsx`.
-  - Canonical change cards with clause numbers and evidence assurance in `ChangeCard.jsx`.
-  - Production bundle verified with Vite (`npm run build`).
-
----
-
-## [0.2.0] 2026-09-15 — Engineering audit + architecture freeze
-
-### Added
-- `CHANGELOG.md` and `CONTRIBUTIONS.md`
-- Canonical change object schema documented in `docs/ARCHITECTURE.md`
-- Test strategy matrix (T01–T20) defined in `tests/test_strategy.py`
-
----
-
-## [0.1.0] 2026-09-15 — Initial project scaffold
-
-### Added
-- FastAPI backend scaffold with `/api/compare`, `/api/status`, `/api/results`, `/api/health`
-- Initial React + Tailwind frontend
-- Demo PDFs and initial evaluation script
+- **FastAPI Backend & React Frontend:**
+  - REST endpoints for upload, background comparison processing, status polling, and results retrieval.
+  - Interactive dual-view dashboard with stats, filter bar, and evidence inspection modal.
