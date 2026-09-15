@@ -32,6 +32,9 @@ This file records verified work performed by each team member during the hackath
 * **Evidence Spans & Result Aggregator (`backend/pipeline/validator.py`):**
   * Integrated `EvidenceSpan` supporting fragments per `DetectedChange`.
   * Preserved explicit unchanged policy provisions (`disbursement_mode`, `exclusions`) while suppressing non-differing bullet fragments.
+* **Operational Note Generation Engine (`backend/models/schemas.py`, `backend/pipeline/llm_analyzer.py`):**
+  * Added `operational_note` to canonical `DetectedChange` schema.
+  * Formulated deterministic, actionable field guidance for agricultural extension officers across all 24 change units.
 
 ---
 
@@ -39,6 +42,9 @@ This file records verified work performed by each team member during the hackath
 * **Multi-Span Evidence Grounding UI:**
   * Enhanced `EvidenceModal.jsx` to render the new *Grounding Fragments* panel showing individual supporting evidence spans with old/new page numbers and verified quote chips.
   * Preserved full side-by-side comparative inspection with exact substring yellow highlights.
+* **Operational Note UI & Field Study Cards (`EvidenceModal.jsx`, `ChangeCard.jsx`):**
+  * Designed and integrated the prominent *Operational Note for Field Officers & Administrative Study* banner inside `EvidenceModal.jsx` with value shift badges.
+  * Integrated actionable *Operational Note* preview callouts directly into `ChangeCard.jsx` on the main dashboard for quick studying.
 * **Component & Production Build Verification:**
   * Verified responsive styling and status badge colors for all 8 agricultural categories.
   * Executed clean production bundle build with Vite (`npm run build`).
@@ -51,7 +57,8 @@ This file records verified work performed by each team member during the hackath
   * Authored `tests/test_unseen.py` demonstrating zero overfitting to the benchmark pair.
 * **Regression Test Suite:**
   * Authored `tests/test_regression.py` containing 11 tests for whitespace, punctuation-only diffs, numeric token preservation, date preservation, survey number preservation, and structural pairing.
-* **Benchmark Optimization Metrics:**
+* **Benchmark & Operational Dataset Optimization:**
+  * Synchronized `data/benchmark_results.json` with field-level operational notes.
   * Re-evaluated benchmark with `evaluation/eval.py`:
     * Precision: **91.7%** (up from 50.0%)
     * Recall: **100.0%** (22 / 22 ground truth detected, up from 81.8%)
@@ -65,6 +72,8 @@ This file records verified work performed by each team member during the hackath
 ### DINESH B — Integration & Release
 * **End-to-End Lifecycle Testing:**
   * Authored `tests/test_e2e_workflow.py` validating the entire comparison API cycle from file upload to job polling, dual-view payload verification, and summary counter consistency.
+* **Repository Architecture & .gitignore Refinement:**
+  * Updated `.gitignore` to ensure `backend/models/` schema definitions are tracked properly while preserving model cache exclusions.
 * **Documentation & Release Notes:**
   * Updated `README.md` with the v1.0.0 vs v1.1.0 benchmark comparison table.
   * Updated `CHANGELOG.md` with complete v1.1.0 optimization notes.

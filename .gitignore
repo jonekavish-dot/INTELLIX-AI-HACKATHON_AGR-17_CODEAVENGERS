@@ -59,7 +59,9 @@ temp/
 
 # Model cache (large files — download locally)
 .cache/
-models/
+/models/
+!backend/models/
+!backend/models/**
 *.bin
 *.safetensors
 
