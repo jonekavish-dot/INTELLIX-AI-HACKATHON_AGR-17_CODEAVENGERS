@@ -1,7 +1,7 @@
 {
   "job_id": "test-job-sync-01",
   "status": "completed",
-  "processing_time_seconds": 0.15,
+  "processing_time_seconds": 0.01,
   "documents": {
     "old": {
       "filename": "land_record_old.pdf",
@@ -60,7 +60,7 @@
       "new_page": 1,
       "summary": "Content modified under 'Introduction'.",
       "interpretation": "Substantive changes detected affecting administrative requirements.",
-      "operational_note": "Content under 'Introduction' was modified in new version.",
+      "operational_note": "Content under 'Introduction' was modified in new version. Action Required: Review updated guidelines under 'Introduction' for field application compliance.",
       "impact": "MEDIUM",
       "evidence_status": "SUPPORTED",
       "confidence": 0.85,
@@ -102,7 +102,7 @@
       "new_page": 1,
       "summary": "Content modified under 'LAND IDENTIFICATION'.",
       "interpretation": "Substantive changes detected affecting administrative requirements.",
-      "operational_note": "Survey / Subdivision Number changed from '123' to '123/2'. Land Area / Holding Limit changed from '2 acres' to '4 acres'.",
+      "operational_note": "Survey / Subdivision Number changed from '123' to '123/2'. Land Area / Holding Limit changed from '2 acres' to '4 acres'. Action Required: Inspect revenue FMB sketch to verify boundary coordinates of subdivided parcel and recalculate land revenue assessment.",
       "impact": "HIGH",
       "evidence_status": "SUPPORTED",
       "confidence": 0.85,
@@ -144,7 +144,7 @@
       "new_page": 1,
       "summary": "Content modified under 'RECORDED HOLDER'.",
       "interpretation": "Substantive changes detected affecting administrative requirements.",
-      "operational_note": "Patta / Land Holder changed from 'ABC' to 'XYZ'.",
+      "operational_note": "Patta / Land Holder changed from 'ABC' to 'XYZ'. Action Required: Verify registered sale deed and legal heir succession documentation for mutation endorsement in the revenue register.",
       "impact": "MEDIUM",
       "evidence_status": "SUPPORTED",
       "confidence": 0.85,
@@ -186,7 +186,7 @@
       "new_page": 1,
       "summary": "Content modified under 'ADMINISTRATIVE VERIFICATION'.",
       "interpretation": "Substantive changes detected affecting administrative requirements.",
-      "operational_note": "Verifier Designation changed from 'Revenue Inspector' to 'Tahsildar'. Verification Date was added in new version as '15-10-2026'. Transaction Date was added in new version as '10-09-2026'.",
+      "operational_note": "Verifier Designation changed from 'Revenue Inspector' to 'Tahsildar'. Verification Date was added in new version as '15-10-2026'. Transaction Date was added in new version as '10-09-2026'. Action Required: Dossier requires final attestation signature and official seal before revenue register endorsement.",
       "impact": "MEDIUM",
       "evidence_status": "SUPPORTED",
       "confidence": 0.85,
@@ -228,7 +228,7 @@
       "new_page": null,
       "summary": "Provision removed from 'REMARKS & RECORD NOTES'.",
       "interpretation": "Previous condition or requirement is no longer in effect.",
-      "operational_note": "Provision under 'REMARKS & RECORD NOTES' was removed in new version.",
+      "operational_note": "Provision under 'REMARKS & RECORD NOTES' was removed in new version. Action Required: Discontinue enforcement of previous clause under 'REMARKS & RECORD NOTES'. Remove requirement from active checklists.",
       "impact": "MEDIUM",
       "evidence_status": "SUPPORTED",
       "confidence": 0.9,
@@ -262,7 +262,7 @@
       "new_page": 1,
       "summary": "New provision added under 'REMARKS & RECORD NOTES'.",
       "interpretation": "New condition or requirement introduced into the document.",
-      "operational_note": "Provision under 'REMARKS & RECORD NOTES' was added in new version.",
+      "operational_note": "Provision under 'REMARKS & RECORD NOTES' was added in new version. Action Required: Implement newly introduced provisions under 'REMARKS & RECORD NOTES'. Update departmental checklist and notify field staff.",
       "impact": "MEDIUM",
       "evidence_status": "SUPPORTED",
       "confidence": 0.9,
@@ -296,7 +296,7 @@
       "new_page": 1,
       "summary": "Content modified under 'GOVERNMENT REVENUE ADMINISTRATION \u2014 PATTA & LAND RECORD'.",
       "interpretation": "Substantive changes detected affecting administrative requirements.",
-      "operational_note": "Content under 'GOVERNMENT REVENUE ADMINISTRATION \u2014 PATTA & LAND RECORD' was modified in new version.",
+      "operational_note": "Content under 'GOVERNMENT REVENUE ADMINISTRATION \u2014 PATTA & LAND RECORD' was modified in new version. Action Required: Review updated guidelines under 'GOVERNMENT REVENUE ADMINISTRATION \u2014 PATTA & LAND RECORD' for field application compliance.",
       "impact": "MEDIUM",
       "evidence_status": "SUPPORTED",
       "confidence": 0.85,
@@ -340,7 +340,7 @@
       "new_page": 1,
       "summary": "Content modified under 'LAND IDENTIFICATION'.",
       "interpretation": "Substantive changes detected affecting administrative requirements.",
-      "operational_note": "Survey / Subdivision Number changed from '123' to '123/2'. Land Area / Holding Limit changed from '2 acres' to '4 acres'.",
+      "operational_note": "Survey / Subdivision Number changed from '123' to '123/2'. Land Area / Holding Limit changed from '2 acres' to '4 acres'. Action Required: Inspect revenue FMB sketch to verify boundary coordinates of subdivided parcel and recalculate land revenue assessment.",
       "impact": "HIGH",
       "evidence_status": "SUPPORTED",
       "confidence": 0.85,
@@ -382,7 +382,7 @@
       "new_page": null,
       "summary": "Provision removed from 'REMARKS & RECORD NOTES'.",
       "interpretation": "Previous condition or requirement is no longer in effect.",
-      "operational_note": "Provision under 'REMARKS & RECORD NOTES' was removed in new version.",
+      "operational_note": "Provision under 'REMARKS & RECORD NOTES' was removed in new version. Action Required: Discontinue enforcement of previous clause under 'REMARKS & RECORD NOTES'. Remove requirement from active checklists.",
       "impact": "MEDIUM",
       "evidence_status": "SUPPORTED",
       "confidence": 0.9,
@@ -416,7 +416,7 @@
       "new_page": 1,
       "summary": "New provision added under 'REMARKS & RECORD NOTES'.",
       "interpretation": "New condition or requirement introduced into the document.",
-      "operational_note": "Provision under 'REMARKS & RECORD NOTES' was added in new version.",
+      "operational_note": "Provision under 'REMARKS & RECORD NOTES' was added in new version. Action Required: Implement newly introduced provisions under 'REMARKS & RECORD NOTES'. Update departmental checklist and notify field staff.",
       "impact": "MEDIUM",
       "evidence_status": "SUPPORTED",
       "confidence": 0.9,
@@ -450,7 +450,7 @@
       "new_page": 1,
       "summary": "Content modified under 'Introduction'.",
       "interpretation": "Substantive changes detected affecting administrative requirements.",
-      "operational_note": "Content under 'Introduction' was modified in new version.",
+      "operational_note": "Content under 'Introduction' was modified in new version. Action Required: Review updated guidelines under 'Introduction' for field application compliance.",
       "impact": "MEDIUM",
       "evidence_status": "SUPPORTED",
       "confidence": 0.85,
@@ -492,7 +492,7 @@
       "new_page": 1,
       "summary": "Content modified under 'RECORDED HOLDER'.",
       "interpretation": "Substantive changes detected affecting administrative requirements.",
-      "operational_note": "Patta / Land Holder changed from 'ABC' to 'XYZ'.",
+      "operational_note": "Patta / Land Holder changed from 'ABC' to 'XYZ'. Action Required: Verify registered sale deed and legal heir succession documentation for mutation endorsement in the revenue register.",
       "impact": "MEDIUM",
       "evidence_status": "SUPPORTED",
       "confidence": 0.85,
@@ -534,7 +534,7 @@
       "new_page": 1,
       "summary": "Content modified under 'ADMINISTRATIVE VERIFICATION'.",
       "interpretation": "Substantive changes detected affecting administrative requirements.",
-      "operational_note": "Verifier Designation changed from 'Revenue Inspector' to 'Tahsildar'. Verification Date was added in new version as '15-10-2026'. Transaction Date was added in new version as '10-09-2026'.",
+      "operational_note": "Verifier Designation changed from 'Revenue Inspector' to 'Tahsildar'. Verification Date was added in new version as '15-10-2026'. Transaction Date was added in new version as '10-09-2026'. Action Required: Dossier requires final attestation signature and official seal before revenue register endorsement.",
       "impact": "MEDIUM",
       "evidence_status": "SUPPORTED",
       "confidence": 0.85,
@@ -576,7 +576,7 @@
       "new_page": 1,
       "summary": "Content modified under 'GOVERNMENT REVENUE ADMINISTRATION \u2014 PATTA & LAND RECORD'.",
       "interpretation": "Substantive changes detected affecting administrative requirements.",
-      "operational_note": "Content under 'GOVERNMENT REVENUE ADMINISTRATION \u2014 PATTA & LAND RECORD' was modified in new version.",
+      "operational_note": "Content under 'GOVERNMENT REVENUE ADMINISTRATION \u2014 PATTA & LAND RECORD' was modified in new version. Action Required: Review updated guidelines under 'GOVERNMENT REVENUE ADMINISTRATION \u2014 PATTA & LAND RECORD' for field application compliance.",
       "impact": "MEDIUM",
       "evidence_status": "SUPPORTED",
       "confidence": 0.85,
@@ -613,7 +613,7 @@
       "old_page": 1,
       "new_page": 1,
       "evidence_status": "SUPPORTED",
-      "notes": "Land Area / Holding Limit changed from '2 acres' to '4 acres'."
+      "notes": "Land Area / Holding Limit changed from '2 acres' to '4 acres'. Action Required: Recompute land holding ceiling and adjust property tax assessment."
     },
     {
       "field_id": "FLD-002",
@@ -625,7 +625,7 @@
       "old_page": 1,
       "new_page": 1,
       "evidence_status": "SUPPORTED",
-      "notes": "Survey / Subdivision Number changed from '123' to '123/2'."
+      "notes": "Survey / Subdivision Number changed from '123' to '123/2'. Action Required: Inspect village FMB sketch to verify boundary coordinates of subdivided parcel 123/2."
     },
     {
       "field_id": "FLD-003",
@@ -637,7 +637,7 @@
       "old_page": 1,
       "new_page": 1,
       "evidence_status": "SUPPORTED",
-      "notes": "Patta / Land Holder changed from 'ABC' to 'XYZ'."
+      "notes": "Patta / Land Holder changed from 'ABC' to 'XYZ'. Action Required: Verify registered sale deed and legal heir succession documentation for mutation endorsement."
     },
     {
       "field_id": "FLD-004",
@@ -649,7 +649,7 @@
       "old_page": 1,
       "new_page": 1,
       "evidence_status": "SUPPORTED",
-      "notes": "Verifier Designation changed from 'Revenue Inspector' to 'Tahsildar'."
+      "notes": "Verifier Designation changed from 'Revenue Inspector' to 'Tahsildar'. Action Required: Dossier requires final attestation signature and official seal of the Tahsildar."
     },
     {
       "field_id": "FLD-005",
@@ -661,7 +661,7 @@
       "old_page": 1,
       "new_page": 1,
       "evidence_status": "SUPPORTED",
-      "notes": "Verifying Officer changed from 'Revenue Inspector' to 'Tahsildar'."
+      "notes": "Verifying Officer changed from 'Revenue Inspector' to 'Tahsildar'. Action Required: Dossier requires final attestation signature and official seal of the Tahsildar."
     },
     {
       "field_id": "FLD-006",
@@ -673,7 +673,7 @@
       "old_page": null,
       "new_page": 1,
       "evidence_status": "SUPPORTED",
-      "notes": "Verification Date was added in new version."
+      "notes": "Verification Date was added in new version as '15-10-2026'. Action Required: Enforce newly added entry during field verification and revenue endorsement."
     },
     {
       "field_id": "FLD-007",
@@ -685,7 +685,7 @@
       "old_page": 1,
       "new_page": 1,
       "evidence_status": "SUPPORTED",
-      "notes": "Village remained identical."
+      "notes": "Village remained identical as 'Anaimalai'. Action Required: Retain existing operational protocol."
     }
   ],
   "evaluation": {
