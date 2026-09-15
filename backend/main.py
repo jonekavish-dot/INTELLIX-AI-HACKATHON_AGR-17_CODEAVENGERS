@@ -202,3 +202,4 @@ async def filtered_changes(
         changes = [c for c in changes if c.get("change_type", "").upper() == change_type.upper()]
 
     return {"job_id": job_id, "count": len(changes), "changes": changes}
+

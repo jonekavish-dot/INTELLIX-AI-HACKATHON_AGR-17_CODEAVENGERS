@@ -61,3 +61,4 @@ def _tfidf_embed(texts: List[str]) -> np.ndarray:
         logger.error(f"TF-IDF also failed: {e}")
         # Last resort: random unit vectors (won't be accurate but won't crash)
         return np.random.randn(len(texts), 384)
+

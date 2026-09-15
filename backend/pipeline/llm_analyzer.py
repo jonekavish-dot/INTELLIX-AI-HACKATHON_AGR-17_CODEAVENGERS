@@ -273,3 +273,4 @@ async def _analyze_pair(pair: Dict) -> Dict:
         return dict(FALLBACK_RESPONSE)
 
     return result
+

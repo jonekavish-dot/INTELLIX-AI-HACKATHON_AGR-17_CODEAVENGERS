@@ -89,3 +89,4 @@ def get_inline_diff_html(old: str, new: str) -> str:
         "old_html": " ".join(old_html),
         "new_html": " ".join(new_html),
     }
+

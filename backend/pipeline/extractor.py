@@ -97,3 +97,4 @@ def _extract_with_ocr(file_bytes: bytes, filename: str) -> List[Dict]:
     except Exception as e:
         logger.error(f"[{filename}] OCR failed: {e}")
         return []
+

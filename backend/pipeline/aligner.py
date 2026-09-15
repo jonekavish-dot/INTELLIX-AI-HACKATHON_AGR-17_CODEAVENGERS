@@ -100,3 +100,4 @@ def _all_as_added_or_removed(old_chunks: List[Dict], new_chunks: List[Dict]) -> 
     for c in new_chunks:
         pairs.append({"old_chunk": None, "new_chunk": c, "similarity": 0.0, "change_type_pre": "ADDED", "matched": False})
     return pairs
+

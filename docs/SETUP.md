@@ -127,3 +127,4 @@ The pipeline has a deterministic fallback — it will still detect ADDED/REMOVED
 changes with similarity scores. The LLM only adds category + impact explanation.
 
 For the demo: pre-compute results and cache them.
+

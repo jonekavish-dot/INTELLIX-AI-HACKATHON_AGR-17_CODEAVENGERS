@@ -183,3 +183,4 @@ def _make_chunk(text: str, section_title: str, section_number: str | None,
         "page_start": page_start,
         "page_end": page_end,
     }
+
