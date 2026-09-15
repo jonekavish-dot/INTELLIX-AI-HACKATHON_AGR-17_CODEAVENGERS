@@ -1,16 +1,28 @@
 import { useState } from 'react'
-import { Leaf, RefreshCw, Download, ListChecks, AlertTriangle, TableProperties, ShieldCheck } from 'lucide-react'
-import ChangeCard from '../components/ChangeCard'
-import EvidenceModal from '../components/EvidenceModal'
+import {
+  ListChecks,
+  AlertTriangle,
+  TableProperties,
+  ShieldCheck,
+  Filter,
+  X,
+  FileSpreadsheet,
+  CheckCircle2,
+  ArrowRight,
+} from 'lucide-react'
+import Navbar from '../components/Navbar'
 import StatsBar from '../components/StatsBar'
 import FilterBar from '../components/FilterBar'
+import ChangeCard from '../components/ChangeCard'
+import EvidenceModal from '../components/EvidenceModal'
 
-export default function ResultsPage({ results, onNewComparison }) {
+export default function ResultsPage({ results, user, onLogout, onNewComparison }) {
   const [activeTab, setActiveTab] = useState('exhaustive') // 'exhaustive' | 'impact' | 'fields'
   const [activeCategory, setActiveCategory] = useState('All')
   const [activeSeverity, setActiveSeverity] = useState('All')
   const [activeType, setActiveType] = useState('All')
   const [selectedChange, setSelectedChange] = useState(null)
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
 
   const allChanges = results?.all_changes || results?.changes || []
   const impactChanges = results?.impact_changes || []
@@ -20,10 +32,16 @@ export default function ResultsPage({ results, onNewComparison }) {
 
   const filtered = currentDataset.filter((c) => {
     const catOk = activeCategory === 'All' || c.category === activeCategory
-    const sevOk = activeSeverity === 'All' || (c.impact || c.severity) === activeSeverity
+    const sev = c.impact || c.severity
+    const sevOk = activeSeverity === 'All' || sev === activeSeverity
     const typeOk = activeType === 'All' || c.change_type === activeType
     return catOk && sevOk && typeOk
   })
+
+  const activeFilterCount =
+    (activeCategory !== 'All' ? 1 : 0) +
+    (activeSeverity !== 'All' ? 1 : 0) +
+    (activeType !== 'All' ? 1 : 0)
 
   const handleExport = () => {
     const blob = new Blob([JSON.stringify(results, null, 2)], { type: 'application/json' })
@@ -38,118 +56,141 @@ export default function ResultsPage({ results, onNewComparison }) {
   return (
     <div className="min-h-screen flex flex-col bg-slate-50">
       {/* Top Navbar */}
-      <header className="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between sticky top-0 z-20 shadow-sm">
-        <div className="flex items-center gap-3">
-          <div className="bg-green-700 p-1.5 rounded-lg">
-            <Leaf className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-gray-900 text-base">AgriDiff AI</span>
-              <span className="bg-emerald-100 text-emerald-800 text-[11px] font-semibold px-2 py-0.5 rounded-full border border-emerald-200">
-                AGR-17
-              </span>
-            </div>
-            <p className="text-[11px] text-gray-400">Agricultural Document Comparison System</p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <button
-            onClick={handleExport}
-            className="flex items-center gap-1.5 text-xs font-semibold text-gray-700 hover:text-gray-900 bg-white border border-gray-200 hover:border-gray-300 px-3.5 py-1.5 rounded-lg shadow-sm transition-all"
-          >
-            <Download className="w-3.5 h-3.5" />
-            Export JSON
-          </button>
-          <button
-            onClick={onNewComparison}
-            className="flex items-center gap-1.5 text-xs font-semibold bg-green-700 hover:bg-green-800 text-white px-3.5 py-1.5 rounded-lg shadow-sm transition-all"
-          >
-            <RefreshCw className="w-3.5 h-3.5" />
-            New Comparison
-          </button>
-        </div>
-      </header>
+      <Navbar
+        user={user}
+        onLogout={onLogout}
+        onNewComparison={onNewComparison}
+        onExport={handleExport}
+        isResultsPage={true}
+      />
 
       {/* Metrics & Document Summary Bar */}
       <StatsBar results={results} />
 
       {/* Main Content Area */}
-      <div className="flex-1 max-w-7xl mx-auto w-full px-4 py-5 flex flex-col">
-        {/* Navigation Tabs */}
-        <div className="flex items-center gap-2 border-b border-gray-200 mb-5">
-          <button
-            onClick={() => setActiveTab('exhaustive')}
-            className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold border-b-2 transition-all ${
-              activeTab === 'exhaustive'
-                ? 'border-green-700 text-green-800 bg-green-50/50'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            <ListChecks className="w-4 h-4" />
-            Exhaustive Comparison
-            <span className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full text-[10px]">
-              {allChanges.length}
-            </span>
-          </button>
+      <div className="flex-1 max-w-7xl mx-auto w-full px-3 sm:px-6 py-4 sm:py-6 flex flex-col">
+        {/* Navigation Tabs Bar with Filter Toggle */}
+        <div className="flex items-center justify-between border-b border-gray-200 mb-4 flex-wrap gap-2">
+          {/* Tabs */}
+          <div className="flex items-center gap-1 sm:gap-2 overflow-x-auto max-w-full pb-1">
+            <button
+              type="button"
+              onClick={() => setActiveTab('exhaustive')}
+              className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 text-xs font-bold border-b-2 transition-all whitespace-nowrap cursor-pointer ${
+                activeTab === 'exhaustive'
+                  ? 'border-green-700 text-green-800 bg-green-50/60'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              <ListChecks className="w-4 h-4 text-green-700" />
+              <span>Exhaustive Comparison</span>
+              <span className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold">
+                {allChanges.length}
+              </span>
+            </button>
 
-          <button
-            onClick={() => setActiveTab('impact')}
-            className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold border-b-2 transition-all ${
-              activeTab === 'impact'
-                ? 'border-amber-600 text-amber-900 bg-amber-50/50'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            <AlertTriangle className="w-4 h-4 text-amber-600" />
-            Impact View (Priority)
-            <span className="bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full text-[10px]">
-              {impactChanges.length}
-            </span>
-          </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('impact')}
+              className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 text-xs font-bold border-b-2 transition-all whitespace-nowrap cursor-pointer ${
+                activeTab === 'impact'
+                  ? 'border-amber-600 text-amber-900 bg-amber-50/60'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              <AlertTriangle className="w-4 h-4 text-amber-600" />
+              <span>Impact View (Priority)</span>
+              <span className="bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold">
+                {impactChanges.length}
+              </span>
+            </button>
 
-          <button
-            onClick={() => setActiveTab('fields')}
-            className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold border-b-2 transition-all ${
-              activeTab === 'fields'
-                ? 'border-blue-600 text-blue-900 bg-blue-50/50'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            <TableProperties className="w-4 h-4 text-blue-600" />
-            Structured & Land Records
-            <span className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full text-[10px]">
-              {fieldChanges.length}
-            </span>
-          </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('fields')}
+              className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 text-xs font-bold border-b-2 transition-all whitespace-nowrap cursor-pointer ${
+                activeTab === 'fields'
+                  ? 'border-blue-600 text-blue-900 bg-blue-50/60'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              <TableProperties className="w-4 h-4 text-blue-600" />
+              <span>Structured & Land Records</span>
+              <span className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold">
+                {fieldChanges.length}
+              </span>
+            </button>
+          </div>
+
+          {/* Mobile Filter Toggle Button (Shown on tablets and phones) */}
+          {activeTab !== 'fields' && (
+            <div className="lg:hidden ml-auto">
+              <button
+                type="button"
+                onClick={() => setMobileFiltersOpen(!mobileFiltersOpen)}
+                className={`flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-xl border transition-all cursor-pointer ${
+                  activeFilterCount > 0
+                    ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                    : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
+                }`}
+              >
+                <Filter className="w-3.5 h-3.5" />
+                <span>Filters</span>
+                {activeFilterCount > 0 && (
+                  <span className="bg-emerald-600 text-white rounded-full w-4 h-4 text-[10px] flex items-center justify-center font-bold">
+                    {activeFilterCount}
+                  </span>
+                )}
+              </button>
+            </div>
+          )}
         </div>
+
+        {/* Mobile Filters Dropdown Panel */}
+        {mobileFiltersOpen && activeTab !== 'fields' && (
+          <div className="lg:hidden mb-4 p-4 bg-white rounded-2xl border border-emerald-200 shadow-md animate-in slide-in-from-top-2">
+            <FilterBar
+              changes={currentDataset}
+              activeCategory={activeCategory}
+              setActiveCategory={setActiveCategory}
+              activeSeverity={activeSeverity}
+              setActiveSeverity={setActiveSeverity}
+              activeType={activeType}
+              setActiveType={setActiveType}
+              isMobile={true}
+              onCloseMobile={() => setMobileFiltersOpen(false)}
+            />
+          </div>
+        )}
 
         {/* Tab 3: Structured Fields & Land Records */}
         {activeTab === 'fields' ? (
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+          <div className="bg-white rounded-2xl sm:rounded-3xl border border-gray-200 shadow-xs overflow-hidden">
+            {/* Header info */}
+            <div className="p-4 sm:p-5 border-b border-gray-100 flex items-center justify-between flex-wrap gap-2">
               <div>
-                <h3 className="text-sm font-bold text-gray-900">
-                  Structured Agricultural Administrative & Land Record Differences
+                <h3 className="text-sm font-extrabold text-gray-900">
+                  Agricultural Land Record & Entity Comparison
                 </h3>
-                <p className="text-xs text-gray-500">
-                  Direct field-to-field comparison with zero inference and strict evidence validation.
+                <p className="text-xs text-gray-500 mt-0.5">
+                  Direct field-to-field comparison with zero inference and strict quote grounding.
                 </p>
               </div>
-              <span className="bg-green-50 text-green-700 text-xs font-semibold px-2.5 py-1 rounded-full border border-green-200 flex items-center gap-1">
-                <ShieldCheck className="w-3.5 h-3.5" /> 100% Grounded
+              <span className="bg-emerald-50 text-emerald-800 text-xs font-extrabold px-3 py-1 rounded-full border border-emerald-200 flex items-center gap-1.5">
+                <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                100% Grounded
               </span>
             </div>
 
-            <div className="overflow-x-auto">
+            {/* Desktop Table View (hidden on mobile < 768px) */}
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="bg-gray-50 text-[11px] font-bold text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                  <tr className="bg-gray-50/80 text-[11px] font-extrabold text-gray-500 uppercase tracking-wider border-b border-gray-200">
                     <th className="px-6 py-3">Field / Entity</th>
                     <th className="px-6 py-3">Old Value</th>
                     <th className="px-6 py-3">New Value</th>
-                    <th className="px-4 py-3">Type</th>
+                    <th className="px-4 py-3">Change Type</th>
                     <th className="px-4 py-3">Evidence</th>
                     <th className="px-6 py-3">Operational Note</th>
                   </tr>
@@ -163,35 +204,41 @@ export default function ResultsPage({ results, onNewComparison }) {
                           {f.field_name}
                         </span>
                       </td>
-                      <td className="px-6 py-3.5 font-mono text-gray-600 bg-red-50/20">
+                      <td className="px-6 py-3.5 font-mono text-gray-700 bg-red-50/20">
                         {f.old_value || 'NOT_FOUND'}
                       </td>
-                      <td className="px-6 py-3.5 font-mono font-semibold text-gray-900 bg-green-50/20">
+                      <td className="px-6 py-3.5 font-mono font-bold text-gray-900 bg-green-50/20">
                         {f.new_value || 'NOT_FOUND'}
                       </td>
                       <td className="px-4 py-3.5">
-                        <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold ${
-                          f.change_type === 'MODIFIED' ? 'bg-amber-100 text-amber-800' :
-                          f.change_type === 'ADDED' ? 'bg-emerald-100 text-emerald-800' :
-                          f.change_type === 'REMOVED' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-600'
-                        }`}>
+                        <span
+                          className={`inline-block px-2 py-0.5 rounded text-[10px] font-extrabold ${
+                            f.change_type === 'MODIFIED'
+                              ? 'bg-amber-100 text-amber-800 border border-amber-200'
+                              : f.change_type === 'ADDED'
+                              ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                              : f.change_type === 'REMOVED'
+                              ? 'bg-red-100 text-red-800 border border-red-200'
+                              : 'bg-gray-100 text-gray-600'
+                          }`}
+                        >
                           {f.change_type}
                         </span>
                       </td>
                       <td className="px-4 py-3.5">
-                        <span className="inline-flex items-center gap-1 text-[11px] text-green-700 font-semibold">
+                        <span className="inline-flex items-center gap-1 text-[11px] text-emerald-700 font-bold">
                           <ShieldCheck className="w-3.5 h-3.5" />
                           {f.evidence_status}
                         </span>
                       </td>
-                      <td className="px-6 py-3.5 text-gray-500 max-w-xs">
+                      <td className="px-6 py-3.5 text-gray-600 max-w-xs leading-relaxed">
                         {f.notes || '—'}
                       </td>
                     </tr>
                   ))}
                   {fieldChanges.length === 0 && (
                     <tr>
-                      <td colSpan={6} className="px-6 py-8 text-center text-gray-400 text-xs">
+                      <td colSpan={6} className="px-6 py-10 text-center text-gray-400 text-xs">
                         No structured land-record fields extracted from this document pair.
                       </td>
                     </tr>
@@ -199,12 +246,78 @@ export default function ResultsPage({ results, onNewComparison }) {
                 </tbody>
               </table>
             </div>
+
+            {/* Mobile Cards View (displayed on < 768px screens) */}
+            <div className="md:hidden p-3 space-y-3">
+              {fieldChanges.map((f) => (
+                <div
+                  key={f.field_id}
+                  className="bg-gray-50/80 border border-gray-200 rounded-2xl p-3.5 shadow-2xs space-y-2.5"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <p className="text-xs font-extrabold text-gray-900">{f.display_label}</p>
+                      <span className="text-[10px] font-mono text-gray-400">{f.field_name}</span>
+                    </div>
+                    <span
+                      className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full border ${
+                        f.change_type === 'MODIFIED'
+                          ? 'bg-amber-100 text-amber-800 border-amber-200'
+                          : f.change_type === 'ADDED'
+                          ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
+                          : 'bg-red-100 text-red-800 border-red-200'
+                      }`}
+                    >
+                      {f.change_type}
+                    </span>
+                  </div>
+
+                  {/* Value Shift Box */}
+                  <div className="grid grid-cols-2 gap-2 text-xs font-mono">
+                    <div className="bg-red-50/70 border border-red-200 rounded-xl p-2">
+                      <span className="text-[9px] font-sans font-bold text-gray-400 uppercase tracking-wider block mb-0.5">
+                        Old Value
+                      </span>
+                      <span className="text-red-800 break-words font-medium">
+                        {f.old_value || 'NOT_FOUND'}
+                      </span>
+                    </div>
+                    <div className="bg-emerald-50/70 border border-emerald-200 rounded-xl p-2">
+                      <span className="text-[9px] font-sans font-bold text-gray-400 uppercase tracking-wider block mb-0.5">
+                        New Value
+                      </span>
+                      <span className="text-emerald-900 font-bold break-words">
+                        {f.new_value || 'NOT_FOUND'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Notes & Evidence */}
+                  <div className="pt-1 text-xs">
+                    <p className="text-[11px] text-gray-700 leading-snug">
+                      <strong className="text-gray-900">Note:</strong> {f.notes || '—'}
+                    </p>
+                    <div className="mt-2 flex items-center justify-between text-[10px]">
+                      <span className="inline-flex items-center gap-1 text-emerald-700 font-bold">
+                        <ShieldCheck className="w-3.5 h-3.5" />
+                        {f.evidence_status}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {fieldChanges.length === 0 && (
+                <div className="p-8 text-center text-gray-400 text-xs">
+                  No structured land-record fields extracted from this document pair.
+                </div>
+              )}
+            </div>
           </div>
         ) : (
           /* Tabs 1 & 2: Exhaustive Comparison or Impact View */
-          <div className="flex gap-6">
-            {/* Filter Sidebar */}
-            <aside className="w-60 flex-shrink-0">
+          <div className="flex flex-col lg:flex-row gap-5">
+            {/* Desktop Filter Sidebar (hidden on small/medium screens) */}
+            <aside className="hidden lg:block w-64 flex-shrink-0">
               <FilterBar
                 changes={currentDataset}
                 activeCategory={activeCategory}
@@ -213,28 +326,45 @@ export default function ResultsPage({ results, onNewComparison }) {
                 setActiveSeverity={setActiveSeverity}
                 activeType={activeType}
                 setActiveType={setActiveType}
+                isMobile={false}
               />
             </aside>
 
             {/* Changes Stream */}
             <main className="flex-1 min-w-0">
-              <div className="flex items-center justify-between mb-3">
-                <p className="text-xs font-semibold text-gray-500">
-                  Showing <span className="text-green-700 font-bold">{filtered.length}</span> of {currentDataset.length} detected changes
+              <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+                <p className="text-xs font-bold text-gray-600">
+                  Showing <span className="text-green-700 font-extrabold">{filtered.length}</span> of{' '}
+                  {currentDataset.length} detected changes
                 </p>
-                {activeTab === 'exhaustive' && (
-                  <span className="text-[11px] text-gray-400">
-                    Displaying every source-supported difference without omission
+                {activeTab === 'exhaustive' ? (
+                  <span className="text-[11px] text-gray-400 hidden sm:inline">
+                    Retaining every source difference · Zero dropped changes
+                  </span>
+                ) : (
+                  <span className="text-[11px] text-amber-700 font-semibold bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                    Prioritized Consequential Changes
                   </span>
                 )}
               </div>
 
               {filtered.length === 0 ? (
-                <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center shadow-sm">
+                <div className="bg-white rounded-2xl border border-gray-200 p-10 text-center shadow-xs">
                   <p className="text-gray-400 text-sm">No changes match the selected filter criteria.</p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveCategory('All')
+                      setActiveSeverity('All')
+                      setActiveType('All')
+                    }}
+                    className="mt-3 text-xs font-bold text-emerald-700 hover:underline cursor-pointer"
+                  >
+                    Reset all filters
+                  </button>
                 </div>
               ) : (
-                <div className="space-y-3.5">
+                <div className="space-y-3">
                   {filtered.map((change) => (
                     <ChangeCard
                       key={change.change_id}
@@ -251,10 +381,7 @@ export default function ResultsPage({ results, onNewComparison }) {
 
       {/* Side-by-Side Evidence Grounding Modal */}
       {selectedChange && (
-        <EvidenceModal
-          change={selectedChange}
-          onClose={() => setSelectedChange(null)}
-        />
+        <EvidenceModal change={selectedChange} onClose={() => setSelectedChange(null)} />
       )}
     </div>
   )
