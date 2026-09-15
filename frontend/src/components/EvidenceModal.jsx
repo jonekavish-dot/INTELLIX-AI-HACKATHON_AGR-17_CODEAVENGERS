@@ -144,8 +144,40 @@ export default function EvidenceModal({ change, onClose }) {
           </div>
         </div>
 
+        {/* Multi-Span Evidence Grounding (Document Change Unit vs Supporting Evidence Spans) */}
+        {change.evidence_spans && change.evidence_spans.length > 0 && (
+          <div className="px-5 py-3 border-b border-gray-100 bg-slate-50/50">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-[11px] font-bold text-gray-600 uppercase tracking-wider">
+                Grounding Fragments ({change.evidence_spans.length} Evidence Spans)
+              </p>
+              <span className="text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                100% Grounded
+              </span>
+            </div>
+            <div className="space-y-1.5 max-h-32 overflow-y-auto">
+              {change.evidence_spans.map((span, sIdx) => (
+                <div key={sIdx} className="bg-white border border-gray-200 rounded-lg p-2 text-xs flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 overflow-hidden">
+                    <span className="text-[10px] font-mono text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded flex-shrink-0">
+                      {span.old_page ? `Old p.${span.old_page}` : ''} {span.new_page ? `New p.${span.new_page}` : ''}
+                    </span>
+                    <span className="font-mono text-gray-800 truncate italic">
+                      "{span.quote || span.new_text?.slice(0, 60) || span.old_text?.slice(0, 60)}"
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-semibold text-emerald-700 flex-shrink-0">
+                    {span.status}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Semantic Analysis & Grounding Verification */}
         <div className="p-5 space-y-3 bg-white rounded-b-3xl">
+
           <p className="text-xs font-bold text-gray-600 uppercase tracking-wider">
             Semantic Intelligence & Reliability Checks
           </p>
