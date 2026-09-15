@@ -1,0 +1,144 @@
+==============================================================================
+AgriDiff AI — Non-Git Artifacts & Excluded Files Inventory
+Team: CODEAVENGERS | BIT-AI-001 | AGR-17
+Repository: AgriDiff AI
+==============================================================================
+
+The following artifacts, local virtual environments, dependency directories,
+caches, secrets, and generated build files are strictly excluded from Git tracking
+via .gitignore. This inventory documents their reason for exclusion, recreation
+procedures, and corresponding project documentation cross-references.
+
+------------------------------------------------------------------------------
+ARTIFACT:
+.env / .env.local / .env.*.local
+REASON:
+Contains private secrets, API credentials (e.g., GEMINI_API_KEY), and environment-
+specific port configurations that must never be exposed publicly.
+HOW TO RECREATE:
+1. Windows: copy .env.example.txt .env
+2. Linux/macOS: cp .env.example.txt .env
+3. Fill in your required variables (e.g. GEMINI_API_KEY).
+WHERE DOCUMENTED:
+.env.example.txt
+docs/SETUP.md
+docs/DEPLOYMENT.md
+
+------------------------------------------------------------------------------
+ARTIFACT:
+node_modules/ & frontend/node_modules/
+REASON:
+Installed third-party Node.js packages and binary bindings (~120 MB). They are
+platform-dependent and generated locally from dependency manifests.
+HOW TO RECREATE:
+cd frontend
+npm install
+WHERE DOCUMENTED:
+frontend/package.json
+frontend/package-lock.json
+docs/DEPENDENCIES.md
+docs/SETUP.md
+
+------------------------------------------------------------------------------
+ARTIFACT:
+.venv/ / venv/ / env/
+REASON:
+Local isolated Python virtual environment containing Python interpreter binaries,
+pip metadata, and site-packages (~250 MB).
+HOW TO RECREATE:
+python -m venv .venv
+# Activate:
+# Windows: .venv\Scripts\activate
+# Linux/macOS: source .venv/bin/activate
+pip install -r backend/requirements.txt
+WHERE DOCUMENTED:
+backend/requirements.txt
+docs/DEPENDENCIES.md
+docs/SETUP.md
+
+------------------------------------------------------------------------------
+ARTIFACT:
+dist/ / frontend/dist/ / build/
+REASON:
+Generated static production build bundle output (transpiled JavaScript chunks,
+minified CSS, index.html) created by the Vite build tool.
+HOW TO RECREATE:
+cd frontend
+npm run build
+WHERE DOCUMENTED:
+frontend/vite.config.js
+docs/SETUP.md
+docs/DEPLOYMENT.md
+
+------------------------------------------------------------------------------
+ARTIFACT:
+__pycache__/ & *.pyc / *.pyo / *.pyd
+REASON:
+Compiled Python bytecode files generated dynamically at runtime by the CPython
+interpreter to optimize script execution.
+HOW TO RECREATE:
+Generated automatically by Python whenever backend services or test suites run.
+WHERE DOCUMENTED:
+.gitignore
+docs/SETUP.md
+
+------------------------------------------------------------------------------
+ARTIFACT:
+.pytest_cache/ & .coverage & htmlcov/
+REASON:
+Temporary test runner caches, test execution state, and code coverage data
+generated during local test suite runs.
+HOW TO RECREATE:
+python -m pytest -v
+WHERE DOCUMENTED:
+pytest.ini
+docs/SETUP.md
+
+------------------------------------------------------------------------------
+ARTIFACT:
+frontend/.vite/
+REASON:
+Local Vite dev server optimization cache storing pre-bundled dependencies for
+instant hot module replacement (HMR).
+HOW TO RECREATE:
+Generated automatically during 'npm run dev'.
+WHERE DOCUMENTED:
+.gitignore
+
+------------------------------------------------------------------------------
+ARTIFACT:
+backend/uploads/ & uploads/ & temp/ & *.tmp
+REASON:
+Temporary runtime storage used when processing multipart PDF comparison requests.
+Documents are processed in memory and cleaned up to prevent data retention.
+HOW TO RECREATE:
+Created automatically on demand by the FastAPI backend runtime.
+WHERE DOCUMENTED:
+backend/main.py
+.gitignore
+
+------------------------------------------------------------------------------
+ARTIFACT:
+.cache/ & /models/ & *.bin & *.safetensors
+REASON:
+Dense transformer model weights or vector embeddings (~90MB - 300MB) from Hugging
+Face Hub. AgriDiff AI utilizes lazy runtime download or seamless fallback to
+scikit-learn TF-IDF vectorization to avoid binary bloat.
+HOW TO RECREATE:
+Downloaded on first use by sentence-transformers or bypassed automatically via
+built-in TF-IDF cosine similarity pipeline.
+WHERE DOCUMENTED:
+backend/pipeline/embedder.py
+docs/DEPENDENCIES.md
+docs/INSTALLATION_TROUBLESHOOTING.md
+
+------------------------------------------------------------------------------
+ARTIFACT:
+*.log & logs/
+REASON:
+Local runtime log files, diagnostic trace output, and server execution transcripts.
+HOW TO RECREATE:
+Generated at runtime when backend services or npm scripts are executed.
+WHERE DOCUMENTED:
+backend/main.py
+.gitignore
